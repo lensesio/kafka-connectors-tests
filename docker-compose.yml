@@ -1,0 +1,24 @@
+version: '2'
+services:
+  fast-data-dev:
+    image: landoop/fast-data-dev
+    ports:
+      - 9092:9092
+      - 8081:8081
+      - 8082:8082
+      - 8083:8083
+      - 2181:2181
+      - 3030:3030
+    depends_on:
+      - redis
+    environment:
+      - ADV_HOST=localhost
+  redis:
+    image: redis
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    expose:
+      - 6379
+    ports:
+      - 6379:6379
+    command: redis-server /usr/local/etc/redis/redis.conf

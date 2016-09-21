@@ -1,0 +1,72 @@
+- name: coyote
+  title: Kafka-connect-redis Tests
+
+- name: Setup Containers
+  entries:
+    - name: Docker Compose Up
+      command: docker-compose up -d
+    - name: Sleep a bit
+      command: sleep 20
+      nolog: true
+    - name: Check docker compose log
+      command: docker-compose logs
+      stdout_has: [ 'INFO success: broker entered RUNNING state' ]
+      stdout_not_has: [ 'INFO exited: broker' ]
+
+- name: Setup Redis Connector
+  entries:
+    - name: Create Topic
+      command: >
+        docker run --rm --net=host landoop/fast-data-dev
+          kafka-topics --zookeeper localhost:2181 --topic person_redis --partition 1 --replication 1 --create
+    - name: Create Redis Connector Configuration
+      command: tee redis-connector.properties.json
+      stdin: |
+        {
+          "name": "redis-%UNIQUE_RC%",
+          "config": {
+            "connector.class": "com.datamountaineer.streamreactor.connect.redis.sink.RedisSinkConnector",
+            "tasks.max": "1",
+            "topics": "person_redis",
+            "connect.redis.connection.host": "redis",
+            "connect.redis.connection.port": "6379",
+            "connect.redis.connection.password": "pass",
+            "connect.redis.export.route.query": "INSERT INTO TABLE1 SELECT * FROM person_redis"
+          }
+        }
+    - name: Create a Redis Distributed Connector
+      command: >
+        curl -vs --stderr - -X POST -H "Content-Type: application/json"
+             --data @redis-connector.properties.json
+             "http://localhost:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+    - command: sleep 20
+      nolog: true
+
+- name: Test Connector
+  entries:
+    - name: Write Entries into Topic
+      command: >
+        docker run --rm -i --net=host landoop/fast-data-dev
+          kafka-avro-console-producer --broker-list localhost:9092
+            --topic person_redis --property
+            value.schema='{"type":"record","name":"User","namespace":"com.datamountaineer.streamreactor.connect.redis","fields":[{"name":"firstName","type":"string"},{"name":"lastName","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
+      stdin: |
+        {"firstName": "%UNIQUE_NAME1%", "lastName": "%UNIQUE_NAME2%", "age":30, "salary": 4830}
+        {"firstName": "%UNIQUE_NAME3%", "lastName": "%UNIQUE_NAME4%", "age":30, "salary": 3048}
+      timeout: 20s
+    - command: sleep 20
+      nolog: true
+    - name: Verify entry 1
+      command:  docker run --rm --net=host redis redis-cli  -h 127.0.0.1 -a pass get "person_redis|0|0"
+      stdout_has: [ '%UNIQUE_NAME1%', '%UNIQUE_NAME2%' ]
+    - name: Verify entry 2
+      command:  docker run --rm --net=host redis redis-cli  -h 127.0.0.1 -a pass get "person_redis|0|1"
+      stdout_has: [ '%UNIQUE_NAME3%', '%UNIQUE_NAME4%' ]
+
+- name: Clean-up Containers
+  entries:
+    - name: Docker Compose Down
+      command: docker-compose down
+    - command: rm redis-connector.properties.json
+      nolog: true
