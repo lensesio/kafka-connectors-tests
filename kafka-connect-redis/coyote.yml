@@ -18,7 +18,7 @@
     - name: Create Topic
       command: >
         docker run --rm --net=host landoop/fast-data-dev
-          kafka-topics --zookeeper localhost:2181 --topic person_redis --partition 1 --replication 1 --create
+          kafka-topics --zookeeper localhost:52181 --topic person_redis --partition 1 --replication 1 --create
     - name: Create Redis Connector Configuration
       command: tee redis-connector.properties.json
       stdin: |
@@ -29,7 +29,7 @@
             "tasks.max": "1",
             "topics": "person_redis",
             "connect.redis.connection.host": "redis",
-            "connect.redis.connection.port": "6379",
+            "connect.redis.connection.port": "56379",
             "connect.redis.connection.password": "pass",
             "connect.redis.export.route.query": "INSERT INTO TABLE1 SELECT * FROM person_redis"
           }
@@ -38,7 +38,7 @@
       command: >
         curl -vs --stderr - -X POST -H "Content-Type: application/json"
              --data @redis-connector.properties.json
-             "http://localhost:8083/connectors"
+             "http://localhost:58083/connectors"
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
     - command: sleep 20
       nolog: true
@@ -48,8 +48,9 @@
     - name: Write Entries into Topic
       command: >
         docker run --rm -i --net=host landoop/fast-data-dev
-          kafka-avro-console-producer --broker-list localhost:9092
-            --topic person_redis --property
+          kafka-avro-console-producer --broker-list localhost:59092
+            --topic person_redis --property schema.registry.url="http://localhost:58081"
+            --property
             value.schema='{"type":"record","name":"User","namespace":"com.datamountaineer.streamreactor.connect.redis","fields":[{"name":"firstName","type":"string"},{"name":"lastName","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
       stdin: |
         {"firstName": "%UNIQUE_NAME1%", "lastName": "%UNIQUE_NAME2%", "age":30, "salary": 4830}
@@ -58,10 +59,10 @@
     - command: sleep 20
       nolog: true
     - name: Verify entry 1
-      command:  docker run --rm --net=host redis redis-cli  -h 127.0.0.1 -a pass get "person_redis|0|0"
+      command:  docker run --rm --net=host redis redis-cli -h 127.0.0.1 -p 56379 -a pass get "person_redis|0|0"
       stdout_has: [ '%UNIQUE_NAME1%', '%UNIQUE_NAME2%' ]
     - name: Verify entry 2
-      command:  docker run --rm --net=host redis redis-cli  -h 127.0.0.1 -a pass get "person_redis|0|1"
+      command:  docker run --rm --net=host redis redis-cli -h 127.0.0.1 -p 56379 -a pass get "person_redis|0|1"
       stdout_has: [ '%UNIQUE_NAME3%', '%UNIQUE_NAME4%' ]
 
 - name: Clean-up Containers
