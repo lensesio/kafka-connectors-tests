@@ -18,6 +18,8 @@ WORKSPACE="${WORKSPACE:-$(pwd)}"
 # Remove old files it they exist:
 rm -f "$WORKSPACE"/status.txt
 rm -f "$WORKSPACE"/exitcode
+rm -f "$WORKSPACE"/latest.html
+rm -f "$WORKSPACE"/index.html
 
 # Check if test directory exists
 if [[ ! -d "$1" ]]; then
@@ -61,3 +63,4 @@ DATE="$(date '+%Y%m%d-%H%M')"
 cp "$TEST_DIR"/coyote.html "$RESULTS_DIR"/"$(basename ${TEST_DIR})-${DATE}$(cat status.txt).html"
 rm -f latest.html
 mv "$TEST_DIR"/coyote.html latest.html
+ln -s latest.html index.html
