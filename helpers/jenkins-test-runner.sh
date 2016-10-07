@@ -37,7 +37,7 @@ alias docker-compose="sudo /usr/local/bin/docker-compose"
 # cd into workdir and run coyote
 pushd "$TEST_DIR"
 set +e
-$WORKSPACE/$COYOTE
+"$WORKSPACE/$COYOTE"
 EXITCODE="$?"
 set -e
 popd
