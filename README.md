@@ -12,9 +12,27 @@ Thus instead of automating the needed steps via ansible, we will document them
 here.
 
 Permit Jenkins user to run docker and generally have some root rights by addding
-it to root group:
+it to docker group:
 
     sudo usermod -aG docker jenkins
+
+Install docker's version of docker since CentOS has an older version that
+doesn't support the `--network` option.
+
+    sudo su
+    systemctl stop docker
+    yum remove docker docker-common docker-selinux
+    tee /etc/yum.repos.d/docker.repo <<-'EOF'
+    [dockerrepo]
+    name=Docker Repository
+    baseurl=https://yum.dockerproject.org/repo/main/centos/7/
+    enabled=1
+    gpgcheck=1
+    gpgkey=https://yum.dockerproject.org/gpg
+    EOF
+    yum install docker-engine
+    systemctl enable docker
+    systemctl stasrt docker
 
 Install docker compose via an official release since it isn't yet available in
 centos.

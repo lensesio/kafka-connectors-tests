@@ -34,7 +34,7 @@ chmod +x $COYOTE
 
 # Set path for jenkins
 export PATH="$PATH:/usr/local/bin"
-alias docker-compose="sudo /usr/local/bin/docker-compose"
+alias docker-compose="/usr/local/bin/docker-compose"
 
 # cd into workdir and run coyote
 pushd "$TEST_DIR"
