@@ -1,0 +1,9 @@
+version: '2'
+services:
+  fast-data-dev:
+    image: landoop/fast-data-dev
+    environment:
+      - ADV_HOST=fast-data-dev
+      - RUNTESTS=0
+#    ports:
+#      - 3030:3030
