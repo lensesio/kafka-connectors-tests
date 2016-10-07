@@ -3,3 +3,8 @@
 .idea
 out.html
 coyote.html
+/results
+latest.html
+*-connector.properties.json
+/exitcode
+/status.txt

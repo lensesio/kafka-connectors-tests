@@ -19,6 +19,7 @@ services:
       - REST_PORT=58082
       - CONNECT_PORT=58083
       - WEB_PORT=53030
+      - RUNTESTS=0
   redis:
     image: redis
     volumes:
