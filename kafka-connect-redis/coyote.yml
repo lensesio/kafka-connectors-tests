@@ -6,7 +6,7 @@
     - name: Docker Compose Up
       command: docker-compose up -d
     - name: Sleep a bit
-      command: sleep 20
+      command: sleep 30
       nolog: true
     - name: Check docker compose log
       command: docker-compose logs
@@ -17,10 +17,15 @@
   entries:
     - name: Create Topic
       command: >
-        docker run --rm --net=host landoop/fast-data-dev
-          kafka-topics --zookeeper localhost:52181 --topic person_redis --partition 1 --replication 1 --create
-    - name: Create Redis Connector Configuration
-      command: tee redis-connector.properties.json
+        docker run --rm --network=kafkaconnectredis_default landoop/fast-data-dev
+          kafka-topics --zookeeper fast-data-dev:2181 --topic person_redis --partition 1 --replication 1 --create
+    - name: Create a Redis Distributed Connector
+      command: >
+        docker run --rm --network=kafkaconnectredis_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
       stdin: |
         {
           "name": "redis-%UNIQUE_RC%",
@@ -29,17 +34,11 @@
             "tasks.max": "1",
             "topics": "person_redis",
             "connect.redis.connection.host": "redis",
-            "connect.redis.connection.port": "56379",
+            "connect.redis.connection.port": "6379",
             "connect.redis.connection.password": "pass",
             "connect.redis.export.route.query": "INSERT INTO TABLE1 SELECT * FROM person_redis"
           }
         }
-    - name: Create a Redis Distributed Connector
-      command: >
-        curl -vs --stderr - -X POST -H "Content-Type: application/json"
-             --data @redis-connector.properties.json
-             "http://localhost:58083/connectors"
-      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
     - command: sleep 30
       nolog: true
 
@@ -47,9 +46,9 @@
   entries:
     - name: Write Entries into Topic
       command: >
-        docker run --rm -i --net=host landoop/fast-data-dev
-          kafka-avro-console-producer --broker-list localhost:59092
-            --topic person_redis --property schema.registry.url="http://localhost:58081"
+        docker run --rm -i --network=kafkaconnectredis_default landoop/fast-data-dev
+          kafka-avro-console-producer --broker-list fast-data-dev:9092
+            --topic person_redis --property schema.registry.url="http://fast-data-dev:8081"
             --property
             value.schema='{"type":"record","name":"User","namespace":"com.datamountaineer.streamreactor.connect.redis","fields":[{"name":"firstName","type":"string"},{"name":"lastName","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
       stdin: |
@@ -59,10 +58,10 @@
     - command: sleep 60
       nolog: true
     - name: Verify entry 1
-      command:  docker run --rm --net=host redis redis-cli -h 127.0.0.1 -p 56379 -a pass get "person_redis|0|0"
+      command:  docker run --rm --network=kafkaconnectredis_default redis redis-cli -h redis -a pass get "person_redis|0|0"
       stdout_has: [ '%UNIQUE_NAME1%', '%UNIQUE_NAME2%' ]
     - name: Verify entry 2
-      command:  docker run --rm --net=host redis redis-cli -h 127.0.0.1 -p 56379 -a pass get "person_redis|0|1"
+      command:  docker run --rm --network=kafkaconnectredis_default redis redis-cli -h redis -a pass get "person_redis|0|1"
       stdout_has: [ '%UNIQUE_NAME3%', '%UNIQUE_NAME4%' ]
 
 - name: Clean-up Containers
