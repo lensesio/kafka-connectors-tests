@@ -1,0 +1,79 @@
+- name: coyote
+  title: Kafka-connect-elastic Tests
+
+- name: Setup Containers
+  entries:
+    - name: Docker Compose Pull
+      command: docker-compose pull
+    - name: Docker Compose Up
+      command: docker-compose up -d
+    - name: Sleep a bit
+      command: sleep 30
+      nolog: true
+    - name: Check docker compose log
+      command: docker-compose logs
+      stdout_has: [ 'INFO success: broker entered RUNNING state' ]
+      stdout_not_has: [ 'INFO exited: broker' ]
+
+- name: Setup ElasticSearch Connector
+  entries:
+    - name: Create Topic
+      command: >
+        docker run --rm --network=kafkaconnectelastic_default landoop/fast-data-dev
+          kafka-topics --zookeeper fast-data-dev:2181 --topic elastic-sink --partition 1 --replication 1 --create
+    - name: Create an ElasticSearch Distributed Connector
+      command: >
+        docker run --rm --network=kafkaconnectelastic_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      stdin: |
+        {
+          "name": "elastic-sink",
+          "config": {
+            "connector.class": "com.datamountaineer.streamreactor.connect.elastic.ElasticSinkConnector",
+            "tasks.max": "1",
+            "topics": "elastic-sink",
+            "connect.elastic.url": "elasticsearch:9300",
+            "connect.elastic.cluster.name": "landoop",
+            "connect.elastic.export.route.query": "INSERT INTO INDEX_1 SELECT field1, field2 FROM elastic-sink"
+          }
+        }
+    - command: sleep 30
+      nolog: true
+
+- name: Test Connector
+  entries:
+    - name: Write Entries into Topic
+      command: >
+        docker run --rm -i --network=kafkaconnectelastic_default landoop/fast-data-dev
+          kafka-avro-console-producer --broker-list fast-data-dev:9092
+            --topic elastic-sink --property schema.registry.url="http://fast-data-dev:8081"
+            --property
+            value.schema='{"type":"record","name":"myrecord","fields":[{"name":"id","type":"int"},{"name":"random_field", "type": "string"}]}'
+      stdin: |
+        {"id": 999, "random_field": "foo"}
+        {"id": 888, "random_field": "bar"}
+      timeout: 20s
+    - command: sleep 60
+      nolog: true
+    - name: Verify entry 1
+      command: >
+        docker run --rm --network=kafkaconnectelastic_default landoop/fast-data-dev
+          curl -XGET 'http://elasticsearch:9200/INDEX_1/_search?q=id:999'
+      stdout_has: [ 'random_field', 'foo' ]
+    - name: Verify entry 2
+      command: >
+        docker run --rm --network=kafkaconnectelastic_default landoop/fast-data-dev
+          curl -XGET 'http://elasticsearch:9200/INDEX_1/_search?q=id:888'
+      stdout_has: [ 'random_field', 'bar' ]
+    - name: Read First 2000 Lines of Connect Logs
+      command: >
+        docker exec kafkaconnectelastic_fast-data-dev_1 head -n2000 /var/log/connect-distributed.log
+      stdout_not_has: [ '\] ERROR' ]
+
+- name: Clean-up Containers
+  entries:
+    - name: Docker Compose Down
+      command: docker-compose down
