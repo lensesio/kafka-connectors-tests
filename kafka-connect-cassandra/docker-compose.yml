@@ -1,0 +1,14 @@
+version: '2'
+services:
+  fast-data-dev:
+    image: landoop/fast-data-dev
+    depends_on:
+      - cassandra
+    environment:
+      - ADV_HOST=fast-data-dev
+      - RUNTESTS=1
+    ports:
+      - 3030:3030
+  cassandra:
+    build: ./cassandra
+    image: landoop/cassandra

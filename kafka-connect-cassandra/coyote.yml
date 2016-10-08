@@ -1,0 +1,85 @@
+- name: coyote
+  title: Kafka-connect-cassandra Tests
+
+- name: Setup Containers
+  entries:
+    - name: Build Docker Images
+      command: docker-compose build
+    - name: Docker Compose Up
+      command: docker-compose up -d
+    - name: Sleep a bit
+      command: sleep 60
+      nolog: true
+    - name: Check docker compose log
+      command: docker-compose logs
+      stdout_has: [ 'INFO success: broker entered RUNNING state' ]
+      stdout_not_has: [ 'INFO exited: broker', 'cassandra.*ERROR', 'cassandra.*Exception' ]
+
+- name: Setup Cassandra Source Connector
+  entries:
+    - name: Create Source Topic
+      command: >
+        docker run --rm --network=kafkaconnectcassandra_default landoop/fast-data-dev
+          kafka-topics --zookeeper fast-data-dev:2181 --topic cassandra-source --partition 1 --replication 1 --create
+    - name: Create Cassandra Source Table and Data
+      command: >
+        docker run --rm --network=kafkaconnectcassandra_default -i landoop/cassandra
+          cqlsh -u cassandra -p cassandra cassandra
+      stdin: |
+        CREATE KEYSPACE source WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1};
+        use source;
+        
+        create table orders (id int, created timeuuid, product text, qty int, price float, PRIMARY KEY (id, created))
+        WITH CLUSTERING ORDER BY (created asc);
+        
+        INSERT INTO orders (id, created, product, qty, price) VALUES (1, now(), 'OP-DAX-P-20150201-95.7', 100, 94.2);
+        INSERT INTO orders (id, created, product, qty, price) VALUES (2, now(), 'OP-DAX-C-20150201-100', 100, 99.5);
+        INSERT INTO orders (id, created, product, qty, price) VALUES (3, now(), 'FU-KOSPI-C-20150201-100', 200, 150);
+        
+        SELECT * FROM orders;
+    - name: Create a Cassandra Source Distributed Connector
+      command: >
+        docker run --rm --network=kafkaconnectcassandra_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      stdin: |
+        {
+          "name": "cassandra-source",
+          "config": {
+            "connector.class": "com.datamountaineer.streamreactor.connect.cassandra.source.CassandraSourceConnector",
+            "tasks.max": "1",
+            "connect.cassandra.key.space": "source",
+            "connect.cassandra.import.route.query": "INSERT INTO cassandra-source SELECT * FROM orders PK created",
+            "connect.cassandra.import.mode": "incremental",
+            "connect.cassandra.contact.points": "cassandra",
+            "connect.cassandra.username": "cassandra",
+            "connect.cassandra.password": "cassandra"
+          }
+        }
+    - command: sleep 30
+      nolog: true
+
+- name: Test Connector
+  entries:
+    - name: Read Entries from Topic
+      command: >
+        timeout 20
+        docker run --rm --network=kafkaconnectcassandra_default landoop/fast-data-dev
+          kafka-avro-console-consumer --zookeeper fast-data-dev:2181/confluent
+                                      --bootstrap-server fast-data-dev:9092
+                                      --topic cassandra-source --from-beginning --new-consumer
+                                      --property schema.registry.url=http://fast-data-dev:8081
+      ignore_exit_code: true
+      stdout_has: [ 'OP-DAX-P-20150201-95.7', 'OP-DAX-C-20150201-100', 'FU-KOSPI-C-20150201-100' ]
+    - name: Read First 2000 Lines of Connect Logs
+      command: >
+        docker exec kafkaconnectcassandra_fast-data-dev_1 head -n2000 /var/log/connect-distributed.log
+
+      stdout_not_has: [ 'ERROR.*datamountaineer', 'ERROR.*casandra' ]
+
+- name: Clean-up Containers
+  entries:
+    - name: Docker Compose Down
+      command: docker-compose down
