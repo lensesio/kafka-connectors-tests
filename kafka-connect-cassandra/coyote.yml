@@ -3,6 +3,8 @@
 
 - name: Setup Containers
   entries:
+    - name: Docker Compose Pull
+      command: docker-compose pull
     - name: Build Docker Images
       command: docker-compose build
     - name: Docker Compose Up

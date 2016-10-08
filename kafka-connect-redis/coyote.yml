@@ -3,6 +3,8 @@
 
 - name: Setup Containers
   entries:
+    - name: Docker Compose Pull
+      command: docker-compose pull
     - name: Docker Compose Up
       command: docker-compose up -d
     - name: Sleep a bit
