@@ -48,7 +48,10 @@
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       stdout_has: [ 'lock_time', 'sequence', '"tx_index":[0-9]{5,5}' ]
-
+    - name: Read First 2000 Lines of Connect Logs
+      command: >
+        docker exec kafkaconnectblockchain_fast-data-dev_1 head -n2000 /var/log/connect-distributed.log
+      stdout_not_has: [ 'ERROR.*datamountaineer', 'ERROR.*blockchain' ]
 - name: Clean-up Containers
   entries:
     - name: Docker Compose Down
