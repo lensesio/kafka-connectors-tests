@@ -2,6 +2,8 @@
 
 An independent set of tests for various Kafka Connect connectors.
 
+Most recent test reports are available at <https://coyote.landoop.com/connect/>
+
 ---
 
 ## Introduction
