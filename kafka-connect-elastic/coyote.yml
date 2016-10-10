@@ -5,6 +5,9 @@
   entries:
     - name: Docker Compose Pull
       command: docker-compose pull
+      ignore_exit_code: true
+    - name: Docker Compose Build
+      command: docker-compose build
     - name: Docker Compose Up
       command: docker-compose up -d
     - name: Sleep a bit
@@ -37,7 +40,7 @@
             "topics": "elastic-sink",
             "connect.elastic.url": "elasticsearch:9300",
             "connect.elastic.cluster.name": "landoop",
-            "connect.elastic.export.route.query": "INSERT INTO INDEX_1 SELECT field1, field2 FROM elastic-sink"
+            "connect.elastic.export.route.query": "INSERT INTO sink-index SELECT id, random_field FROM elastic-sink"
           }
         }
     - command: sleep 30
@@ -51,7 +54,7 @@
           kafka-avro-console-producer --broker-list fast-data-dev:9092
             --topic elastic-sink --property schema.registry.url="http://fast-data-dev:8081"
             --property
-            value.schema='{"type":"record","name":"myrecord","fields":[{"name":"id","type":"int"},{"name":"random_field", "type": "string"}]}'
+            value.schema='{"type":"record","name":"myrecord","fields":[{"name":"id","type":"int"},{"name":"random_field","type":"string"}]}'
       stdin: |
         {"id": 999, "random_field": "foo"}
         {"id": 888, "random_field": "bar"}
@@ -61,13 +64,17 @@
     - name: Verify entry 1
       command: >
         docker run --rm --network=kafkaconnectelastic_default landoop/fast-data-dev
-          curl -XGET 'http://elasticsearch:9200/INDEX_1/_search?q=id:999'
+          curl -XGET 'http://elasticsearch:9200/sink-index/_search?q=id:999'
       stdout_has: [ 'random_field', 'foo' ]
     - name: Verify entry 2
       command: >
         docker run --rm --network=kafkaconnectelastic_default landoop/fast-data-dev
-          curl -XGET 'http://elasticsearch:9200/INDEX_1/_search?q=id:888'
+          curl -XGET 'http://elasticsearch:9200/sink-index/_search?q=id:888'
       stdout_has: [ 'random_field', 'bar' ]
+    - name: Verify ElasticSearch
+      command: >
+        docker run --rm --network=kafkaconnectelastic_default landoop/fast-data-dev
+          curl -XGET 'http://elasticsearch:9200'
     - name: Read First 2000 Lines of Connect Logs
       command: >
         docker exec kafkaconnectelastic_fast-data-dev_1 head -n2000 /var/log/connect-distributed.log

@@ -1,7 +1,8 @@
 version: '2'
 services:
   fast-data-dev:
-    image: landoop/fast-data-dev
+    build: ./fast-data-dev-elastic/
+    image: landoop/fast-data-dev-elastic
     depends_on:
       - elasticsearch
     environment:
