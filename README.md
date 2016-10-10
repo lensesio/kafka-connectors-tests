@@ -1,62 +1,42 @@
-# Connector Tests #
+# Kafka Connectors Tests
 
-Basic testing of various connectors using docker and coyote.
+An independent set of tests for various Kafka Connect connectors.
 
+---
 
+## Introduction
 
-## Prepare Test Server ##
+We setup and test various connectors in a pragmatic environment. That is we
+spawn at least a broker, a zookeeper instance, a schema registry, a connect
+distributed instance and any other software needed (e.g elasticsearch, redis,
+cassandra) in docker containers and then perform tests using standard tools.
+This practice permits us to verify that a connector does work, as well as
+provide a basic example of how to setup and test it. Advanced tests verify how
+the connector performs in special cases.
 
-For now we use Cloudera03 server. This will hopefully not be a permanent setup
-because it gives too much rights to jenkins.
-Thus instead of automating the needed steps via ansible, we will document them
-here.
+To achieve this we use our in-house developed —open source— tools coupled with
+docker-compose. The main testing tool is
+[Coyote](https://github.com/Landoop/coyote), which takes yml files describing
+the test process and performs each step logging output, errors and other
+information. Our
+[fast-data-dev](https://hub.docker.com/r/landoop/fast-data-dev/) docker image
+is used as a reference Confluent Platform installation.
 
-Permit Jenkins user to run docker and generally have some root rights by addding
-it to docker group:
+## Run the tests
 
-    sudo usermod -aG docker jenkins
+To run the tests on your computer you need coyote, docker and docker-compose.
+You can grab coyote from our
+[release page](https://github.com/Landoop/coyote/releases) or built it yourself
+via `go get github.com/landoop/coyote`. For the installation of docker and
+docker-compose we will have to refer you to
+[docker's](https://docs.docker.com/engine/installation/) and
+[docker-compose's](https://docs.docker.com/engine/installation/) documentation.
 
-Install docker's version of docker since CentOS has an older version that
-doesn't support the `--network` option.
+Once you install all the tools, just enter into a test directory and run:
 
-    sudo su
-    systemctl stop docker
-    yum remove docker docker-common docker-selinux
-    tee /etc/yum.repos.d/docker.repo <<-'EOF'
-    [dockerrepo]
-    name=Docker Repository
-    baseurl=https://yum.dockerproject.org/repo/main/centos/7/
-    enabled=1
-    gpgcheck=1
-    gpgkey=https://yum.dockerproject.org/gpg
-    EOF
-    yum install docker-engine
-    systemctl enable docker
-    systemctl stasrt docker
+    coyote
 
-Install docker compose via an official release since it isn't yet available in
-centos.
-Visit [compose github release page](https://github.com/docker/compose/releases)
-for the latest release. In general, you will run something like this:
-
-    sudo su
-    curl -L https://github.com/docker/compose/releases/download/1.8.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
-
-## Running in Jenkins
-
-We have many tests which we want to run separately and in parallel. This leads
-to one jenkins job per test design, which unfortunately is time-consuming to
-maintain, as for each little change, we would have to update tens of jenkins'
-jobs.
-
-For this we created the `helpers` directory and there we store scripts we use
-to run the tests from jenkins, thus moving the better part of the run logic to
-this repo.
-
-To run a test from Jenkins, you would run something like:
-
-    helpers/jenkins-test-runner.sh kafka-connect-redis
-
-This runs the tests and creates such files (as status.txt and exitcode) that
-the jenkins job can use to set the build name, exit status, etc.
+Wait a few minutes for coyote to finish and it will produce a `coyote.html` file
+with the test's report.
+Coyote uses its exit code to indicate the numbers of tests that failed, thus an
+error code from coyote doesn't usually show a problem into coyote itself.
