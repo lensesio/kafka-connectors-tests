@@ -31,7 +31,7 @@ fi
 TEST_NAME="$(basename "$TEST_DIR")"
 
 # Download latest Coyote
-COYOTE=coyote-1.0-amd64
+COYOTE=coyote-1.0-linux-amd64
 wget -nc https://github.com/Landoop/coyote/releases/download/v1.0/$COYOTE
 chmod +x $COYOTE
 
