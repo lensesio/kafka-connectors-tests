@@ -5,6 +5,7 @@
   entries:
     - name: Docker Compose Build
       command: docker-compose build
+      ignore_exit_code: true
     - name: Docker Compose Up
       command: docker-compose up -d
     - name: Sleep a bit
