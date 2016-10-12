@@ -8,7 +8,9 @@
 
 set -e
 
-TEST_DIR="$1"
+TEST_DIR="${TEST_DIR:-$1}"
+TEST_VERSION="${TEST_VERSION:-$2}"
+TEST_VERSION="${TEST_VERSION:latest}"
 RESULTS_DIR="results"
 
 # Set current dir (which should be repo's top dir) to workspace so we can test
@@ -22,7 +24,7 @@ rm -f "$WORKSPACE"/latest.html
 rm -f "$WORKSPACE"/index.html
 
 # Check if test directory exists
-if [[ ! -d "$1" ]]; then
+if [[ ! -d "$TEST_DIR" ]]; then
     echo "Test directory not found. The '\$1' argument is: $1."
     exit 255
 fi
@@ -36,11 +38,15 @@ chmod +x $COYOTE
 export PATH="$PATH:/usr/local/bin"
 alias docker-compose="/usr/local/bin/docker-compose"
 
-# cd into workdir and run coyote
+# cd into workdir, replace fast-data-dev version and run coyote
+# then restore files via git
 pushd "$TEST_DIR"
 set +e
+FILES_CHANGED="$(grep -rl 'landoop/fast-data-dev:latest' .)"
+echo "$FILES_CHANGED" | xargs sed "s|landoop/fast-data-dev:latest|landoop/fast-data-dev:$TEST_VERSION|g" -i
 "$WORKSPACE/$COYOTE"
 EXITCODE="$?"
+echo "$FILES_CHANGED"  | xargs git checkout --
 set -e
 popd
 

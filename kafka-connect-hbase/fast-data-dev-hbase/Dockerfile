@@ -1,4 +1,4 @@
-FROM landoop/fast-data-dev
+FROM landoop/fast-data-dev:latest
 MAINTAINER Marios Andreopoulos <marios@landoop.com>
 
 RUN apk add --no-cache \

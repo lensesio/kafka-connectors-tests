@@ -1,7 +1,7 @@
 version: '2'
 services:
   fast-data-dev:
-    image: landoop/fast-data-dev
+    image: landoop/fast-data-dev:latest
     environment:
       - ADV_HOST=fast-data-dev
       - FORWARDLOGS=0
