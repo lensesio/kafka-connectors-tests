@@ -1,5 +1,5 @@
 - name: coyote
-  title: Kafka-connect-cassandra Tests
+  title: kafka-connect-cassandra
 
 - name: Setup Containers
   entries:

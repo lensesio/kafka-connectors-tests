@@ -1,5 +1,5 @@
 - name: coyote
-  title: Kafka-connect-hbase Tests
+  title: kafka-connect-hbase
 
 - name: Setup Containers
   entries:

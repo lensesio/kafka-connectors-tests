@@ -28,6 +28,7 @@ if [[ ! -d "$TEST_DIR" ]]; then
     echo "Test directory not found. The '\$1' argument is: $1."
     exit 255
 fi
+TEST_NAME="$(basename "$TEST_DIR")"
 
 # Download latest Coyote
 COYOTE=coyote-1.0-amd64
@@ -44,9 +45,11 @@ pushd "$TEST_DIR"
 set +e
 FILES_CHANGED="$(grep -rl 'landoop/fast-data-dev:latest' .)"
 echo "$FILES_CHANGED" | xargs sed "s|landoop/fast-data-dev:latest|landoop/fast-data-dev:$TEST_VERSION|g" -i
+sed -e "s/$TEST_NAME/$TEST_NAME $TEST_VERSION/" -i coyote.yml
 "$WORKSPACE/$COYOTE"
 EXITCODE="$?"
-echo "$FILES_CHANGED"  | xargs git checkout --
+[[ ! -z "$FILES_CHANGED" ]] && echo "$FILES_CHANGED"  | xargs git checkout --
+git checkout -- coyote.yml
 set -e
 popd
 

@@ -1,5 +1,5 @@
 - name: coyote
-  title: Kafka-connect-redis Tests
+  title: kafka-connect-redis
 
 - name: Setup Containers
   entries:

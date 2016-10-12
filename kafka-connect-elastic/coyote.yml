@@ -1,5 +1,5 @@
 - name: coyote
-  title: Kafka-connect-elastic Tests
+  title: kafka-connect-elastic
 
 - name: Setup Containers
   entries:

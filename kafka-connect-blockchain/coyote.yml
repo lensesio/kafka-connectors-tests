@@ -1,5 +1,5 @@
 - name: coyote
-  title: Kafka-connect-blockchain Tests
+  title: kafka-connect-blockchain
 
 - name: Setup Containers
   entries:
