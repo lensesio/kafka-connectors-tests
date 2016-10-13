@@ -73,3 +73,9 @@ cp "$TEST_DIR"/coyote.html "$RESULTS_DIR"/"$(basename ${TEST_DIR})-${DATE}$(cat 
 rm -f latest.html
 mv "$TEST_DIR"/coyote.html latest.html
 ln -s latest.html index.html
+
+# Create index page for test
+rm -rf mainpage
+mkdir -p mainpage
+wget "https://raw.githubusercontent.com/Landoop/coyote-results-aggregator/master/index.html" -O mainpage/index.html
+sed -e "s/TITLE/$TEST_DIR test/g" -i mainpage/index.html
