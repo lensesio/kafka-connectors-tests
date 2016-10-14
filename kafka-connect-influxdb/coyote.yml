@@ -1,0 +1,87 @@
+- name: coyote
+  title: kafka-connect-influxdb
+
+- name: Setup Containers
+  entries:
+    - name: Docker Compose Pull
+      command: docker-compose pull
+      ignore_exit_code: true
+    - name: Docker Compose Build
+      command: docker-compose build
+    - name: Docker Compose Up
+      command: docker-compose up -d
+    - name: Sleep a bit
+      command: sleep 30
+      nolog: true
+    - name: Check docker compose log
+      command: docker-compose logs
+      stdout_has: [ 'INFO success: broker entered RUNNING state' ]
+      stdout_not_has: [ 'INFO exited: broker' ]
+
+- name: Setup InfluxDB Connector
+  entries:
+    - name: Create Topic
+      command: >
+        docker run --rm --network=kafkaconnectinfluxdb_default landoop/fast-data-dev
+          kafka-topics --zookeeper fast-data-dev:2181 --topic influxdb-sink --partition 1 --replication 1 --create
+    - name: Create InfluxDB Admin User
+      command: >
+        docker exec -i kafkaconnectinfluxdb_influxdb_1
+          influx
+      stdin:
+       CREATE USER landoop WITH PASSWORD 'landoop' WITH ALL PRIVILEGES
+    - name: Create InfluxDB Database
+      command: >
+        docker exec -i kafkaconnectinfluxdb_influxdb_1
+          influx -username landoop -password landoop
+      stdin:
+       CREATE DATABASE landoop
+    - name: Create an InfluxDB Distributed Connector
+      command: >
+        docker run --rm --network=kafkaconnectinfluxdb_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      stdin: |
+        {
+          "name": "influxdb-sink",
+          "config": {
+            "connector.class": "com.datamountaineer.streamreactor.connect.influx.InfluxSinkConnector",
+            "tasks.max": "1",
+            "topics": "influxdb-sink",
+            "connect.influx.connection.url": "http://influxdb:8086",
+            "connect.influx.connection.user": "landoop",
+            "connect.influx.connection.password": "landoop",
+            "connect.influx.connection.database": "landoop",
+            "connect.influx.sink.route.query": "INSERT INTO test SELECT * FROM influxdb-sink"
+          }
+        }
+    - command: sleep 30
+      nolog: true
+
+- name: Test Connector
+  entries:
+    - name: Write Entries into Topic
+      command: >
+        docker run --rm -i --network=kafkaconnectinfluxdb_default landoop/fast-data-dev
+          kafka-avro-console-producer --broker-list fast-data-dev:9092
+            --topic influxdb-sink --property schema.registry.url="http://fast-data-dev:8081"
+            --property
+            value.schema='{"type":"record","name":"myrecord","fields":[{"name":"id","type":"int"},{"name":"random_field","type":"string"}]}'
+      stdin: |
+        {"id": 999, "random_field": "foo"}
+        {"id": 888, "random_field": "bar"}
+      timeout: 20s
+    - command: sleep 60
+      nolog: true
+    - name: Read First 2000 Lines of Connect Logs
+      command: >
+        docker exec kafkaconnectinfluxdb_fast-data-dev_1 head -n2000 /var/log/connect-distributed.log
+      stdout_not_has: [ '\] ERROR' ]
+      stdout_has: [ '\] INFO .*Written' ]
+
+- name: Clean-up Containers
+  entries:
+    - name: Docker Compose Down
+      command: docker-compose down

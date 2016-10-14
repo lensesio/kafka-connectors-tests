@@ -1,0 +1,16 @@
+version: '2'
+services:
+  fast-data-dev:
+    image: landoop/fast-data-dev:v0.2.2-16-gfd69a55
+    depends_on:
+      - influxdb
+    environment:
+      - ADV_HOST=fast-data-dev
+      - FORWARDLOGS=0
+      - RUNTESTS=0
+    # ports:
+    #   - 3030:3030
+  influxdb:
+    image: influxdb
+    volumes:
+      - ./influxdb.conf:/etc/influxdb/influxdb.conf
