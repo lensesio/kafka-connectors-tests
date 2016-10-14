@@ -42,7 +42,7 @@
             "connect.hazelcast.sink.group.password": "dev-pass"
           }
         }
-    - command: sleep 30
+    - command: sleep 20
       nolog: true
 
 - name: Test Connector
@@ -57,10 +57,13 @@
       stdin: |
         {"firstName": "John", "lastName": "Smith", "age":30, "salary": 4830}
       timeout: 20s
+    - command: sleep 20
+      nolog: true
     - name: Read First 2000 Lines of Connect Logs
       command: >
         docker exec kafkaconnecthazelcast_fast-data-dev_1 head -n2000 /var/log/connect-distributed.log
-      stdout_not_has: [ '\] INFO Written 1 \(com.datamountaineer.streamreactor.connect.hazelcast' ]
+      stdout_has: [ '\] INFO com.datamountaineer.streamreactor.connect.hazelcast.sink.HazelCastWriter - Written 1' ]
+      stdout_not_has: [ '\] ERROR' ]
 
 - name: Clean-up Containers
   entries:
