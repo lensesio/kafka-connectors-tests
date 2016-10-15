@@ -28,14 +28,16 @@
       command: >
         docker exec -i kafkaconnectinfluxdb_influxdb_1
           influx
-      stdin:
+      stdin: |
        CREATE USER landoop WITH PASSWORD 'landoop' WITH ALL PRIVILEGES
     - name: Create InfluxDB Database
       command: >
         docker exec -i kafkaconnectinfluxdb_influxdb_1
           influx -username landoop -password landoop
-      stdin:
+      stdin: |
        CREATE DATABASE landoop
+       USE landoop
+       CREATE RETENTION POLICY "default" ON "landoop" DURATION 30d REPLICATION 1 DEFAULT
     - name: Create an InfluxDB Distributed Connector
       command: >
         docker run --rm --network=kafkaconnectinfluxdb_default -i landoop/fast-data-dev
@@ -54,6 +56,7 @@
             "connect.influx.connection.user": "landoop",
             "connect.influx.connection.password": "landoop",
             "connect.influx.connection.database": "landoop",
+            "connect.influx.retention.policy": "default",
             "connect.influx.sink.route.query": "INSERT INTO test SELECT * FROM influxdb-sink"
           }
         }
@@ -68,18 +71,27 @@
           kafka-avro-console-producer --broker-list fast-data-dev:9092
             --topic influxdb-sink --property schema.registry.url="http://fast-data-dev:8081"
             --property
-            value.schema='{"type":"record","name":"myrecord","fields":[{"name":"id","type":"int"},{"name":"random_field","type":"string"}]}'
+            value.schema='{"type":"record","name":"myrecord","fields":[{"name":"id","type":"int"},{"name":"temperature","type":"int"}]}'
       stdin: |
-        {"id": 999, "random_field": "foo"}
-        {"id": 888, "random_field": "bar"}
+        {"id": 999, "temperature": 28}
+        {"id": 888, "temperature": 37}
       timeout: 20s
-    - command: sleep 60
+    - command: sleep 120
       nolog: true
+      # this wait is so long because influxdb delays to show new entries for non-default policies
+    - name: Verify Entries in InfluxDB
+      command: >
+        docker exec -i kafkaconnectinfluxdb_influxdb_1
+          influx -username landoop -password landoop
+      stdin: |
+        USE landoop
+        SELECT * FROM "test"
+      stdout_has: [ '\s*28\n', '\s*37\n', 'temperature' ]
     - name: Read First 2000 Lines of Connect Logs
       command: >
         docker exec kafkaconnectinfluxdb_fast-data-dev_1 head -n2000 /var/log/connect-distributed.log
       stdout_not_has: [ '\] ERROR' ]
-      stdout_has: [ '\] INFO .*Written' ]
+      stdout_has: [ '\] INFO Writing complete' ]
 
 - name: Clean-up Containers
   entries:
