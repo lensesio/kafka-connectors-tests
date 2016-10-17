@@ -1,0 +1,83 @@
+- name: coyote
+  title: kafka-connect-rethink
+
+- name: Setup Containers
+  entries:
+    - name: Docker Compose Pull
+      command: docker-compose pull
+      ignore_exit_code: true
+    - name: Docker Compose Build
+      command: docker-compose build
+    - name: Docker Compose Up
+      command: docker-compose up -d
+    - name: Sleep a bit
+      command: sleep 30
+      nolog: true
+    - name: Check docker compose log
+      command: docker-compose logs
+      stdout_has: [ 'INFO success: broker entered RUNNING state' ]
+      stdout_not_has: [ 'INFO exited: broker' ]
+
+- name: Setup RethinkDB Connector
+  entries:
+    - name: Create Topic
+      command: >
+        docker run --rm --network=kafkaconnectrethink_default landoop/fast-data-dev
+          kafka-topics --zookeeper fast-data-dev:2181 --topic rethink-sink --partition 1 --replication 1 --create
+    - name: Create RethinkDB Test Database and Table
+      command: >
+        docker run --rm --network=kafkaconnectrethink_default landoop/fast-data-dev-rethinkdb-client
+          rethinkdb-test -server rethinkdb:28015 -database landoop -create-db -table connect_test -create-table
+    - name: Create a RethinkDB Distributed Connector
+      command: >
+        docker run --rm --network=kafkaconnectrethink_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      stdin: |
+        {
+          "name": "rethink-sink",
+          "config": {
+            "connector.class": "com.datamountaineer.streamreactor.connect.rethink.sink.ReThinkSinkConnector",
+            "tasks.max": "1",
+            "topics": "rethink-sink",
+            "connect.rethink.sink.db": "landoop",
+            "connect.rethink.sink.host": "rethinkdb",
+            "connect.rethink.sink.port": "28015",
+            "connect.rethink.sink.export.route.query": "INSERT INTO connect_test SELECT * FROM rethink-sink"
+           }
+        }
+    - command: sleep 30
+      nolog: true
+
+- name: Test Connector
+  entries:
+    - name: Write Entries into Topic
+      command: >
+        docker run --rm -i --network=kafkaconnectrethink_default landoop/fast-data-dev
+          kafka-avro-console-producer --broker-list fast-data-dev:9092
+            --topic rethink-sink --property schema.registry.url="http://fast-data-dev:8081"
+            --property
+            value.schema='{"type":"record","name":"User","namespace":"com.datamountaineer.streamreactor.connect.jms","fields":[{"name":"firstName","type":"string"},{"name":"lastName","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
+      stdin: |
+        {"firstName": "John", "lastName": "Smith", "age":30, "salary": 4830}
+        {"firstName": "Anna", "lastName": "Jones", "age":28, "salary": 5430}
+      timeout: 20s
+    - command: sleep 30
+      nolog: true
+    - name: Read RethinkDB Test Table
+      command: >
+        docker run --rm --network=kafkaconnectrethink_default landoop/fast-data-dev-rethinkdb-client
+          rethinkdb-test -server rethinkdb:28015 -database landoop -table connect_test -read-table
+      stdout_has: [ 'John', 'Smith', 'Anna', 'Jones' ]
+    - name: Read First 2000 Lines of Connect Logs
+      command: >
+        docker exec kafkaconnectrethink_fast-data-dev_1 head -n2000 /var/log/connect-distributed.log
+      stdout_has: [ '\] INFO .*Writ' ]
+      stdout_not_has: [ '\] ERROR' ]
+
+- name: Clean-up Containers
+  entries:
+    - name: Docker Compose Down
+      command: docker-compose down

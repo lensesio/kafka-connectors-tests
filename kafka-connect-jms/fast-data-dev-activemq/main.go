@@ -12,9 +12,11 @@ import (
 	"github.com/go-stomp/stomp"
 )
 
-var serverAddr = flag.String("server", "localhost:61613", "STOMP server endpoint")
-var originName = flag.String("origin", "/topic/connect_topic", "origin queue or topic")
-var logFilename = flag.String("log", "", "file to write output (and logs), stdout if left empty")
+var (
+	serverAddr  = flag.String("server", "localhost:61613", "STOMP server endpoint")
+	originName  = flag.String("origin", "/topic/connect_topic", "origin queue or topic")
+	logFilename = flag.String("log", "", "file to write output (and logs), stdout if left empty")
+)
 
 func main() {
 	flag.Parse()
