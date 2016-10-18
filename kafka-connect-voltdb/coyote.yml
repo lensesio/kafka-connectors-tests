@@ -62,6 +62,7 @@
             value.schema='{"type":"record","name":"User","namespace":"com.datamountaineer.streamreactor.connect.voltdb","fields":[{"name":"firstname","type":"string"},{"name":"lastname","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
       stdin: |
         {"firstname": "John", "lastname": "Smith", "age":30, "salary": 4830}
+        {"firstname": "Anna", "lastname": "Doe", "age":30, "salary": 5820}
       timeout: 20s
     - command: sleep 30
       nolog: true
@@ -71,7 +72,7 @@
           sqlcmd
       stdin: |
         SELECT * FROM person;
-      stdout_has: [ 'Jonh', 'Smith', 'Anna', 'Doe', '5820' ]
+      stdout_has: [ 'John', 'Smith', 'Anna', 'Doe', '5820' ]
     - name: Read First 2000 Lines of Connect Logs
       command: >
         docker exec kafkaconnectvoltdb_fast-data-dev_1 head -n2000 /var/log/connect-distributed.log
