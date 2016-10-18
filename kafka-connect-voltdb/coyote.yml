@@ -1,0 +1,83 @@
+- name: coyote
+  title: kafka-connect-voltdb
+
+- name: Setup Containers
+  entries:
+    - name: Docker Compose Pull
+      command: docker-compose pull
+      ignore_exit_code: true
+    - name: Docker Compose Up
+      command: docker-compose up -d
+    - name: Sleep a bit
+      command: sleep 30
+      nolog: true
+    - name: Check docker compose log
+      command: docker-compose logs
+      stdout_has: [ 'INFO success: broker entered RUNNING state' ]
+      stdout_not_has: [ 'INFO exited: broker' ]
+
+- name: Setup VoltDB Connector
+  entries:
+    - name: Create Topic
+      command: >
+        docker run --rm --network=kafkaconnectvoltdb_default landoop/fast-data-dev
+          kafka-topics --zookeeper fast-data-dev:2181 --topic voltdb-sink --partition 1 --replication 1 --create
+    - name: Create VoltDB Table
+      command: >
+        docker exec -i kafkaconnectvoltdb_voltdb_1
+          sqlcmd
+      stdin: |
+        create table person(firstname varchar(128), lastname varchar(128), age int, salary float, primary key (firstname, lastname));
+    - name: Create a VoltDB Distributed Connector
+      command: >
+        docker run --rm --network=kafkaconnectvoltdb_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      stdin: |
+        {
+          "name": "voltdb-sink",
+          "config": {
+            "connector.class": "com.datamountaineer.streamreactor.connect.voltdb.VoltSinkConnector",
+            "tasks.max": "1",
+            "topics": "voltdb-sink",
+            "connect.volt.connection.servers": "voltdb:21212",
+            "connect.volt.connection.user": "",
+            "connect.volt.connection.password": "",
+            "connect.volt.export.route.query": "INSERT INTO person SELECT * FROM voltdb-sink"
+          }
+        }
+    - command: sleep 30
+      nolog: true
+
+- name: Test Connector
+  entries:
+    - name: Write Entries into Topic
+      command: >
+        docker run --rm -i --network=kafkaconnectvoltdb_default landoop/fast-data-dev
+          kafka-avro-console-producer --broker-list fast-data-dev:9092
+            --topic voltdb-sink --property schema.registry.url="http://fast-data-dev:8081"
+            --property
+            value.schema='{"type":"record","name":"User","namespace":"com.datamountaineer.streamreactor.connect.voltdb","fields":[{"name":"firstname","type":"string"},{"name":"lastname","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
+      stdin: |
+        {"firstname": "John", "lastname": "Smith", "age":30, "salary": 4830}
+      timeout: 20s
+    - command: sleep 30
+      nolog: true
+    - name: Verify entries in VoltDB
+      command: >
+        docker exec -i kafkaconnectvoltdb_voltdb_1
+          sqlcmd
+      stdin: |
+        SELECT * FROM person;
+      stdout_has: [ 'Jonh', 'Smith', 'Anna', 'Doe', '5820' ]
+    - name: Read First 2000 Lines of Connect Logs
+      command: >
+        docker exec kafkaconnectvoltdb_fast-data-dev_1 head -n2000 /var/log/connect-distributed.log
+      stdout_not_has: [ '\] ERROR' ]
+
+- name: Clean-up Containers
+  entries:
+    - name: Docker Compose Down
+      command: docker-compose down
