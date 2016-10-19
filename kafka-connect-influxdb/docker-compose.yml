@@ -1,8 +1,7 @@
 version: '2'
 services:
   fast-data-dev:
-    build: ./fast-data-dev-no-druid
-    image: landoop/fast-data-dev-no-druid
+    image: landoop/fast-data-dev:latest
     depends_on:
       - influxdb
     environment:
