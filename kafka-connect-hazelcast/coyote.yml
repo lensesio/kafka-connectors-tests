@@ -59,9 +59,9 @@
       timeout: 20s
     - command: sleep 20
       nolog: true
-    - name: Read First 2000 Lines of Connect Logs
+    - name: Read First 3000 Lines of Connect Logs
       command: >
-        docker exec kafkaconnecthazelcast_fast-data-dev_1 head -n2000 /var/log/connect-distributed.log
+        docker exec kafkaconnecthazelcast_fast-data-dev_1 head -n3000 /var/log/connect-distributed.log
       stdout_has: [ '\] INFO com.datamountaineer.streamreactor.connect.hazelcast.sink.HazelCastWriter - Written 1' ]
       stdout_not_has: [ '\] ERROR' ]
 

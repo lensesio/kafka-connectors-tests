@@ -75,9 +75,9 @@
         docker exec -i kafkaconnecthbase_fast-data-dev_1 hbase shell
       stdout_has: [ 'John', 'Anna' ]
       stdin: scan 'person'
-    - name: Read First 2000 Lines of Connect Logs
+    - name: Read First 3000 Lines of Connect Logs
       command: >
-        docker exec kafkaconnecthbase_fast-data-dev_1 head -n2000 /var/log/connect-distributed.log
+        docker exec kafkaconnecthbase_fast-data-dev_1 head -n3000 /var/log/connect-distributed.log
       stdout_not_has: [ '\] ERROR' ]
 
 - name: Clean-up Containers

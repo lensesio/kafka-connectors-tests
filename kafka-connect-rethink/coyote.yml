@@ -71,9 +71,9 @@
         docker run --rm --network=kafkaconnectrethink_default landoop/fast-data-dev-rethinkdb-client
           rethinkdb-test -server rethinkdb:28015 -database landoop -table connect_test -read-table
       stdout_has: [ 'John', 'Smith', 'Anna', 'Jones' ]
-    - name: Read First 2000 Lines of Connect Logs
+    - name: Read First 3000 Lines of Connect Logs
       command: >
-        docker exec kafkaconnectrethink_fast-data-dev_1 head -n2000 /var/log/connect-distributed.log
+        docker exec kafkaconnectrethink_fast-data-dev_1 head -n3000 /var/log/connect-distributed.log
       stdout_has: [ '\] INFO .*Writ' ]
       stdout_not_has: [ '\] ERROR' ]
 
