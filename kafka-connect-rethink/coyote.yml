@@ -18,17 +18,21 @@
       stdout_has: [ 'INFO success: broker entered RUNNING state' ]
       stdout_not_has: [ 'INFO exited: broker' ]
 
-- name: Setup RethinkDB Connector
+- name: Setup RethinkDB Connectors
   entries:
-    - name: Create Topic
+    - name: Create Sink Topic
       command: >
         docker run --rm --network=kafkaconnectrethink_default landoop/fast-data-dev
           kafka-topics --zookeeper fast-data-dev:2181 --topic rethink-sink --partition 1 --replication 1 --create
+    - name: Create Source Topic
+      command: >
+        docker run --rm --network=kafkaconnectrethink_default landoop/fast-data-dev
+          kafka-topics --zookeeper fast-data-dev:2181 --topic rethink-source --partition 1 --replication 1 --create
     - name: Create RethinkDB Test Database and Table
       command: >
         docker run --rm --network=kafkaconnectrethink_default landoop/fast-data-dev-rethinkdb-client
           rethinkdb-test -server rethinkdb:28015 -database landoop -create-db -table connect_test -create-table
-    - name: Create a RethinkDB Distributed Connector
+    - name: Create a RethinkDB Distributed Sink Connector
       command: >
         docker run --rm --network=kafkaconnectrethink_default -i landoop/fast-data-dev
           curl -vs --stderr - -X POST -H "Content-Type: application/json"
@@ -48,10 +52,29 @@
             "connect.rethink.sink.export.route.query": "INSERT INTO connect_test SELECT * FROM rethink-sink"
            }
         }
+    - name: Create a RethinkDB Distributed Source Connector
+      command: >
+        docker run --rm --network=kafkaconnectrethink_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      stdin: |
+        {
+          "name": "rethink-source",
+          "config": {
+            "connector.class": "com.datamountaineer.streamreactor.connect.rethink.source.ReThinkSourceConnector",
+            "tasks.max": "1",
+            "connect.rethink.source.db": "landoop",
+            "connect.rethink.source.host": "rethinkdb",
+            "connect.rethink.source.port": "28015",
+            "connect.rethink.import.route.query": "INSERT INTO rethink-source SELECT * FROM connect_test"
+           }
+        }
     - command: sleep 30
       nolog: true
 
-- name: Test Connector
+- name: Test Connectors
   entries:
     - name: Write Entries into Topic
       command: >
@@ -66,11 +89,21 @@
       timeout: 20s
     - command: sleep 30
       nolog: true
-    - name: Read RethinkDB Test Table
+    - name: Read RethinkDB Test Table (verify sink)
       command: >
         docker run --rm --network=kafkaconnectrethink_default landoop/fast-data-dev-rethinkdb-client
           rethinkdb-test -server rethinkdb:28015 -database landoop -table connect_test -read-table
       stdout_has: [ 'John', 'Smith', 'Anna', 'Jones' ]
+    - name: Read Entries from Source Topic (verify source)
+      command: >
+        timeout 20
+        docker run --rm --network=kafkaconnectrethink_default landoop/fast-data-dev
+          kafka-avro-console-consumer --zookeeper fast-data-dev:2181/confluent
+                                      --bootstrap-server fast-data-dev:9092
+                                      --topic rethink-source --from-beginning --new-consumer
+                                      --property schema.registry.url=http://fast-data-dev:8081
+      ignore_exit_code: true
+      stdout_has: [ 'John', 'Smith', 'Anna', 'Jones', '4830' ]
     - name: Read First 3000 Lines of Connect Logs
       command: >
         docker exec kafkaconnectrethink_fast-data-dev_1 head -n3000 /var/log/connect-distributed.log

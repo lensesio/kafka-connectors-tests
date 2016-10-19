@@ -5,6 +5,7 @@ services:
     image: landoop/fast-data-dev-hbase
     environment:
       - ADV_HOST=fast-data-dev
+      - PREFER_HBASE=true
       - FORWARDLOGS=0
       - RUNTESTS=0
     # ports:
