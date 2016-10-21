@@ -79,3 +79,5 @@ rm -rf mainpage
 mkdir -p mainpage
 wget "https://raw.githubusercontent.com/Landoop/coyote-results-aggregator/master/index.html" -O mainpage/index.html
 sed -e "s/TITLE/$TEST_DIR test/g" -i mainpage/index.html
+
+cp latest.html "/usr/share/jenkins/public/stream-reactor/$TEST_VERSION/$TEST$(cat "$WORKSPACE"/status.txt).html"
