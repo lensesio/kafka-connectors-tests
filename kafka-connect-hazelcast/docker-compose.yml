@@ -12,4 +12,5 @@ services:
     #   - 3030:3030
   hazelcast:
     image: hazelcast/hazelcast
-
+    environment:
+      - JAVA_OPTS=-Dhazelcast.rest.enabled=true

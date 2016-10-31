@@ -12,4 +12,4 @@ services:
     #   - 3030:3030
   elasticsearch:
     image: elasticsearch
-    command: --cluster.name landoop
+    command: -E "cluster.name=landoop"
