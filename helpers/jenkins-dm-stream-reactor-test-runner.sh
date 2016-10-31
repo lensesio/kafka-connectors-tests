@@ -31,8 +31,8 @@ fi
 TEST_NAME="$(basename "$TEST_DIR")"
 
 # Download latest Coyote
-COYOTE=coyote-1.1_alpha_3-linux-amd64
-wget -nc https://archive.landoop.com/tools/coyote/testing/$COYOTE
+COYOTE=coyote-1.1-linux-amd64
+wget -nc https://archive.landoop.com/tools/coyote/1.1/$COYOTE
 chmod +x $COYOTE
 
 # Set path for jenkins

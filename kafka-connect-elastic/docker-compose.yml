@@ -11,5 +11,7 @@ services:
     # ports:
     #   - 3030:3030
   elasticsearch:
-    image: elasticsearch
-    command: -E "cluster.name=landoop"
+    image: elasticsearch:2.4
+    command: --cluster.name landoop
+    # for elasticsearch 5
+    # command: -E "cluster.name=landoop"

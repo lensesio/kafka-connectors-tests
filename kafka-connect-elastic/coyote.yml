@@ -16,7 +16,7 @@
     - name: Check docker compose log
       command: docker-compose logs
       stdout_has: [ 'INFO success: broker entered RUNNING state' ]
-      stdout_not_has: [ 'INFO exited: broker', 'elasticsearch.*\| ERROR' ]
+      stdout_not_has: [ 'INFO exited: broker', 'elasticsearch.*ERROR:' ]
 
 - name: Setup ElasticSearch Connector
   entries:

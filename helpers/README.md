@@ -36,6 +36,13 @@ for the latest release. In general, you will run something like this:
     curl -L https://github.com/docker/compose/releases/download/1.8.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
 
+Set `vm.max_map_count` to a value high enough (if it is lower than 262144) for
+ElasticSearch 5 to start:
+
+    sudo sysctl -w vm.max_map_count=262144
+    echo -e "# for elasticsearch 5\nvm.max_map_count=262144" \
+        | sudo tee /etc/sysctl.d/landoop-elasticsearch.conf
+
 ## Running in Jenkins
 
 We have many tests which we want to run separately and in parallel. This leads
