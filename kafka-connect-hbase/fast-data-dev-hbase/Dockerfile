@@ -12,7 +12,7 @@ RUN apk add --no-cache \
     && echo "progress = dot:giga" | tee /etc/wgetrc \
     && mkdir -p /opt
 
-ARG HBASE_VERSION="1.2.3"
+ARG HBASE_VERSION="1.2.4"
 RUN wget "https://www-eu.apache.org/dist/hbase/stable/hbase-${HBASE_VERSION}-bin.tar.gz" \
     && tar xzf "/hbase-${HBASE_VERSION}-bin.tar.gz" --no-same-owner -C /opt/
 
