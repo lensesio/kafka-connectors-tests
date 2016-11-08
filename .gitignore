@@ -8,3 +8,4 @@ latest.html
 *-connector.properties.json
 /exitcode
 /status.txt
+/fast-data-dev-ui/kafka-connect-ui/*

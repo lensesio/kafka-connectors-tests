@@ -76,8 +76,3 @@
       command: >
         docker exec kafkaconnectkudu_fast-data-dev_1 head -n3000 /var/log/connect-distributed.log
       stdout_not_has: [ '\] ERROR' ]
-
-- name: Clean-up Containers
-  entries:
-    - name: Docker Compose Down
-      command: docker-compose down

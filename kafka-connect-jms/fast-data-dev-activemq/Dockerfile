@@ -1,4 +1,4 @@
-FROM landoop/fast-data-dev:latest
+FROM landoop/fast-data-dev-ui:latest
 MAINTAINER Marios Andreopoulos <marios@landoop.com>
 
 ENV GOPATH=/opt/go PATH=$PATH:/opt/go/bin

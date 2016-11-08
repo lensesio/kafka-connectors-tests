@@ -1,10 +1,10 @@
 version: '2'
 services:
   fast-data-dev:
-    image: landoop/fast-data-dev:latest
+    image: landoop/fast-data-dev-ui:latest
     environment:
       - ADV_HOST=fast-data-dev
       - FORWARDLOGS=0
       - RUNTESTS=0
-    # ports:
-    #  - 3030:3030
+    ports:
+     - 3030:3030
