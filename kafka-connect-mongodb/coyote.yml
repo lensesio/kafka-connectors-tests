@@ -45,7 +45,7 @@
             "connect.mongo.database": "landoop",
             "connect.mongo.connection": "mongodb://mongo:27017/landoop",
             "connect.mongo.sink.batch.size": "10",
-            "connect.mongo.sink.kqcl": "INSERT INTO orders SELECT * FROM mongo-sink"
+            "connect.mongo.sink.kcql": "INSERT INTO orders SELECT * FROM mongo-sink"
           }
         }
     - command: sleep 30
