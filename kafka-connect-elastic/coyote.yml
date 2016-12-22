@@ -40,7 +40,7 @@
             "topics": "elastic-sink",
             "connect.elastic.url": "elasticsearch:9300",
             "connect.elastic.cluster.name": "landoop",
-            "connect.elastic.export.route.query": "INSERT INTO sink-index SELECT id, random_field FROM elastic-sink"
+            "connect.elastic.sink.kcql": "INSERT INTO sink-index SELECT id, random_field FROM elastic-sink"
           }
         }
     - command: sleep 30

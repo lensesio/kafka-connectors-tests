@@ -46,7 +46,7 @@
             "tasks.max": "1",
             "topics": "kudu-sink",
             "connect.kudu.master": "kudu",
-            "connect.kudu.export.route.query": "INSERT INTO connect_test SELECT * FROM kudu-sink"
+            "connect.kudu.sink.kcql": "INSERT INTO connect_test SELECT * FROM kudu-sink"
           }
         }
     - command: sleep 30

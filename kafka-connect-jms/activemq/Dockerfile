@@ -12,7 +12,7 @@ RUN apk add --no-cache \
     && echo "progress = dot:giga" | tee /etc/wgetrc \
     && mkdir -p /opt
 
-ARG ACTIVEMQ_VERSION="5.14.1"
+ARG ACTIVEMQ_VERSION="5.14.2"
 RUN wget "http://apache.mirrors.ovh.net/ftp.apache.org/dist/activemq/${ACTIVEMQ_VERSION}/apache-activemq-${ACTIVEMQ_VERSION}-bin.tar.gz" \
             -O /activemq.tgz \
     && mkdir -p /opt/activemq \

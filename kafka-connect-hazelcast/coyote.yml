@@ -37,7 +37,7 @@
             "tasks.max": "1",
             "topics": "hazelcast-sink",
             "connect.hazelcast.sink.cluster.members": "hazelcast",
-            "connect.hazelcast.export.route.query": "INSERT INTO sink-index SELECT * FROM hazelcast-sink WITHFORMAT JSON BATCH 100",
+            "connect.hazelcast.sink.kcql": "INSERT INTO sink-index SELECT * FROM hazelcast-sink WITHFORMAT JSON BATCH 100",
             "connect.hazelcast.sink.group.name": "dev",
             "connect.hazelcast.sink.group.password": "dev-pass"
           }

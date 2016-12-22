@@ -49,7 +49,7 @@
             "tasks.max": "1",
             "topics": "hbase-sink",
             "connect.hbase.sink.column.family": "d",
-            "connect.hbase.export.route.query": "INSERT INTO person SELECT * FROM hbase-sink"
+            "connect.hbase.sink.kcql": "INSERT INTO person SELECT * FROM hbase-sink"
           }
         }
     - command: sleep 30
