@@ -9,7 +9,7 @@
     - name: Docker Compose Up
       command: docker-compose up -d
     - name: Sleep a bit
-      command: sleep 30
+      command: sleep 45
       nolog: true
     - name: Check docker compose log
       command: docker-compose logs
@@ -45,7 +45,7 @@
             "connect.volt.connection.servers": "voltdb:21212",
             "connect.volt.connection.user": "",
             "connect.volt.connection.password": "",
-            "connect.volt.export.route.query": "INSERT INTO person SELECT * FROM voltdb-sink"
+            "connect.volt.sink.kcql": "INSERT INTO person SELECT * FROM voltdb-sink"
           }
         }
     - command: sleep 30

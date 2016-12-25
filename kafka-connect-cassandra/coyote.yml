@@ -54,7 +54,7 @@
             "connector.class": "com.datamountaineer.streamreactor.connect.cassandra.source.CassandraSourceConnector",
             "tasks.max": "1",
             "connect.cassandra.key.space": "source",
-            "connect.cassandra.import.route.query": "INSERT INTO cassandra-source SELECT * FROM orders PK created",
+            "connect.cassandra.source.kcql": "INSERT INTO cassandra-source SELECT * FROM orders PK created",
             "connect.cassandra.import.mode": "incremental",
             "connect.cassandra.contact.points": "cassandra",
             "connect.cassandra.username": "cassandra",
@@ -93,7 +93,7 @@
             "tasks.max": "1",
             "topics": "cassandra-sink",
             "connect.cassandra.key.space": "sink",
-            "connect.cassandra.export.route.query": "INSERT INTO orders SELECT * FROM cassandra-sink",
+            "connect.cassandra.sink.kcql": "INSERT INTO orders SELECT * FROM cassandra-sink",
             "connect.cassandra.contact.points": "cassandra",
             "connect.cassandra.username": "cassandra",
             "connect.cassandra.password": "cassandra"

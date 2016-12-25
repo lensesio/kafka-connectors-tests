@@ -9,7 +9,7 @@
     - name: Docker Compose Up
       command: docker-compose up -d
     - name: Sleep a bit
-      command: sleep 30
+      command: sleep 45
       nolog: true
     - name: Check docker compose log
       command: docker-compose logs
@@ -39,7 +39,7 @@
             "connect.redis.connection.host": "redis",
             "connect.redis.connection.port": "6379",
             "connect.redis.connection.password": "pass",
-            "connect.redis.export.route.query": "INSERT INTO TABLE1 SELECT * FROM person_redis"
+            "connect.redis.sink.kcql": "INSERT INTO TABLE1 SELECT * FROM person_redis"
           }
         }
     - command: sleep 30

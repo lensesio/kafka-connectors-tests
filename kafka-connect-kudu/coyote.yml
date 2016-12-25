@@ -12,7 +12,7 @@
     - name: Docker Compose Up
       command: docker-compose up -d
     - name: Sleep a bit
-      command: sleep 30
+      command: sleep 45
       nolog: true
     - name: Check docker compose log
       command: docker-compose logs
@@ -46,7 +46,7 @@
             "tasks.max": "1",
             "topics": "kudu-sink",
             "connect.kudu.master": "kudu",
-            "connect.kudu.export.route.query": "INSERT INTO connect_test SELECT * FROM kudu-sink"
+            "connect.kudu.sink.kcql": "INSERT INTO connect_test SELECT * FROM kudu-sink"
           }
         }
     - command: sleep 30

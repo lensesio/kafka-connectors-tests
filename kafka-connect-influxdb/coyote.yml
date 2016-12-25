@@ -11,7 +11,7 @@
     - name: Docker Compose Up
       command: docker-compose up -d
     - name: Sleep a bit
-      command: sleep 30
+      command: sleep 45
       nolog: true
     - name: Check docker compose log
       command: docker-compose logs
@@ -29,15 +29,19 @@
         docker exec -i kafkaconnectinfluxdb_influxdb_1
           influx
       stdin: |
-       CREATE USER landoop WITH PASSWORD 'landoop' WITH ALL PRIVILEGES
+       CREATE USER landoop WITH PASSWORD 'landoop' WITH ALL PRIVILEGES;
     - name: Create InfluxDB Database
       command: >
         docker exec -i kafkaconnectinfluxdb_influxdb_1
           influx -username landoop -password landoop
       stdin: |
-       CREATE DATABASE landoop
-       USE landoop
-       CREATE RETENTION POLICY "default" ON "landoop" DURATION 30d REPLICATION 1 DEFAULT
+       CREATE DATABASE landoop;
+    - name: Set Database Retention Policy
+      command: >
+        docker exec -i kafkaconnectinfluxdb_influxdb_1
+          influx -username landoop -password landoop -database landoop
+      stdin: |
+       CREATE RETENTION POLICY "default" ON "landoop" DURATION 30d REPLICATION 1 DEFAULT;
     - name: Create an InfluxDB Distributed Connector
       command: >
         docker run --rm --network=kafkaconnectinfluxdb_default -i landoop/fast-data-dev
@@ -82,10 +86,9 @@
     - name: Verify Entries in InfluxDB
       command: >
         docker exec -i kafkaconnectinfluxdb_influxdb_1
-          influx -username landoop -password landoop
+          influx -username landoop -password landoop -database landoop
       stdin: |
-        USE landoop
-        SELECT * FROM "test"
+        SELECT * FROM "test";
       stdout_has: [ '\s*28\n', '\s*37\n', 'temperature' ]
     - name: Read First 3000 Lines of Connect Logs
       command: >

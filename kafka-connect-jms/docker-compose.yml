@@ -4,7 +4,7 @@ services:
     build:
       context: ./fast-data-dev-activemq
       args:
-        ACTIVEMQ_VERSION: 5.14.1
+        ACTIVEMQ_VERSION: 5.14.2
     image: landoop/fast-data-dev-activemq
     depends_on:
       - activemq
@@ -18,7 +18,7 @@ services:
     build:
       context: ./activemq
       args:
-        ACTIVEMQ_VERSION: 5.14.1
+        ACTIVEMQ_VERSION: 5.14.2
         ACTIVEMQ_ADMIN: "landoop: landoop, admin"
         ACTIVEMQ_USER: "test: test, user"
     image: landoop/activemq

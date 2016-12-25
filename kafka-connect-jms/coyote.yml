@@ -11,7 +11,7 @@
     - name: Docker Compose Up
       command: docker-compose up -d
     - name: Sleep a bit
-      command: sleep 30
+      command: sleep 45
       nolog: true
     - name: Check docker compose log
       command: docker-compose logs
@@ -44,7 +44,7 @@
             "topics": "jms-sink",
             "connect.jms.sink.url": "tcp://activemq:61616",
             "connect.jms.sink.connection.factory": "org.apache.activemq.ActiveMQConnectionFactory",
-            "connect.jms.sink.export.route.query": "INSERT INTO connect_topic SELECT * FROM jms-sink",
+            "connect.jms.sink.sink.kcql": "INSERT INTO connect_topic SELECT * FROM jms-sink",
             "connect.jms.sink.message.type": "AVRO",
             "connect.jms.error.policy": "THROW",
             "connect.jms.sink.export.route.topics": "connect_topic"
