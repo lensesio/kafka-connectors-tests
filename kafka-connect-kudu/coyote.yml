@@ -12,7 +12,7 @@
     - name: Docker Compose Up
       command: docker-compose up -d
     - name: Sleep a bit
-      command: sleep 45
+      command: sleep 60
       nolog: true
     - name: Check docker compose log
       command: docker-compose logs
