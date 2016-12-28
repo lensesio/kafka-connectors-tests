@@ -75,5 +75,3 @@
   entries:
     - name: Docker Compose Down
       command: docker-compose down
-    - command: rm redis-connector.properties.json
-      nolog: true
