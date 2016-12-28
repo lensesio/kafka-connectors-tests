@@ -39,7 +39,7 @@
             "connect.redis.connection.host": "redis",
             "connect.redis.connection.port": "6379",
             "connect.redis.connection.password": "pass",
-            "connect.redis.sink.kcql": "INSERT INTO TABLE1 SELECT * FROM person_redis"
+            "connect.redis.sink.kcql": "SELECT firstName, lastName, salary from person_redis PK lastName"
           }
         }
     - command: sleep 30
@@ -61,11 +61,11 @@
     - command: sleep 60
       nolog: true
     - name: Verify entry 1
-      command:  docker run --rm --network=kafkaconnectredis_default redis redis-cli -h redis -a pass get "person_redis|0|0"
-      stdout_has: [ '%UNIQUE_NAME1%', '%UNIQUE_NAME2%' ]
+      command:  docker run --rm --network=kafkaconnectredis_default redis redis-cli -h redis -a pass get "%UNIQUE_NAME2%"
+      stdout_has: [ '%UNIQUE_NAME1%', '%UNIQUE_NAME2%', '4830' ]
     - name: Verify entry 2
-      command:  docker run --rm --network=kafkaconnectredis_default redis redis-cli -h redis -a pass get "person_redis|0|1"
-      stdout_has: [ '%UNIQUE_NAME3%', '%UNIQUE_NAME4%' ]
+      command:  docker run --rm --network=kafkaconnectredis_default redis redis-cli -h redis -a pass get "%UNIQUE_NAME4%"
+      stdout_has: [ '%UNIQUE_NAME3%', '%UNIQUE_NAME4%', '3048' ]
     - name: Read First 3000 Lines of Connect Logs
       command: >
         docker exec kafkaconnectredis_fast-data-dev_1 head -n3000 /var/log/connect-distributed.log
