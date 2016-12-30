@@ -49,7 +49,7 @@
             "connect.rethink.sink.db": "landoop",
             "connect.rethink.sink.host": "rethinkdb",
             "connect.rethink.sink.port": "28015",
-            "connect.rethink.sink.sink.kcql": "INSERT INTO connect_test SELECT * FROM rethink-sink"
+            "connect.rethink.sink.kcql": "INSERT INTO connect_test SELECT * FROM rethink-sink"
            }
         }
     - name: Create a RethinkDB Distributed Source Connector
