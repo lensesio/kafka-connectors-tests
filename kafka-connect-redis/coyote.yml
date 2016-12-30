@@ -66,9 +66,9 @@
     - name: Verify entry 2
       command:  docker run --rm --network=kafkaconnectredis_default redis redis-cli -h redis -a pass get "%UNIQUE_NAME4%"
       stdout_has: [ '%UNIQUE_NAME3%', '%UNIQUE_NAME4%', '3048' ]
-    - name: Read First 3000 Lines of Connect Logs
+    - name: Read First 4000 Lines of Connect Logs
       command: >
-        docker exec kafkaconnectredis_fast-data-dev_1 head -n3000 /var/log/connect-distributed.log
+        docker exec kafkaconnectredis_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
       stdout_not_has: [ '\] ERROR' ]
 
 - name: Clean-up Containers

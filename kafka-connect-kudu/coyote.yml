@@ -72,9 +72,9 @@
         docker exec kafkaconnectkudu_kudu_1
           java -DkuduMaster=127.0.0.1 -jar /test-apps/read-table/target/kudu-java-sample-1.0-SNAPSHOT.jar
       stdout_has: [ 'foo', 'bar' ]
-    - name: Read First 3000 Lines of Connect Logs
+    - name: Read First 4000 Lines of Connect Logs
       command: >
-        docker exec kafkaconnectkudu_fast-data-dev_1 head -n3000 /var/log/connect-distributed.log
+        docker exec kafkaconnectkudu_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
       stdout_not_has: [ '\] ERROR' ]
 
 - name: Clean-up Containers

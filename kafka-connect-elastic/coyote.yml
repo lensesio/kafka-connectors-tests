@@ -75,9 +75,9 @@
       command: >
         docker run --rm --network=kafkaconnectelastic_default landoop/fast-data-dev
           curl -XGET 'http://elasticsearch:9200'
-    - name: Read First 3000 Lines of Connect Logs
+    - name: Read First 4000 Lines of Connect Logs
       command: >
-        docker exec kafkaconnectelastic_fast-data-dev_1 head -n3000 /var/log/connect-distributed.log
+        docker exec kafkaconnectelastic_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
       stdout_not_has: [ '\] ERROR' ]
 
 - name: Clean-up Containers

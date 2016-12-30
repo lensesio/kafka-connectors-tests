@@ -72,9 +72,9 @@
       command: >
         docker exec kafkaconnectjms_fast-data-dev_1 cat /var/log/activemq-test.log
       stdout_has: [ 'John', 'Smith', 'Anna', 'Jones' ]
-    - name: Read First 3000 Lines of Connect Logs
+    - name: Read First 4000 Lines of Connect Logs
       command: >
-        docker exec kafkaconnectjms_fast-data-dev_1 head -n3000 /var/log/connect-distributed.log
+        docker exec kafkaconnectjms_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
       stdout_not_has: [ '\] ERROR' ]
 
 - name: Clean-up Containers

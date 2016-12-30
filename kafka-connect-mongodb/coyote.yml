@@ -74,9 +74,9 @@
         use landoop
         db.orders.find()
       stdout_has: [ 'OP-DAX-P-20150201-95.7', 'FU-KOSPI-C-20150201-100', '2016-05-06 13:54:00', '2016-05-06 13:55:00' ]
-    - name: Read First 3000 Lines of Connect Logs
+    - name: Read First 4000 Lines of Connect Logs
       command: >
-        docker exec kafkaconnectmongodb_fast-data-dev_1 head -n3000 /var/log/connect-distributed.log
+        docker exec kafkaconnectmongodb_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
       stdout_not_has: [ '\] ERROR' ]
 
 - name: Clean-up Containers
