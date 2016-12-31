@@ -1,4 +1,4 @@
-να το - name: coyote
+- name: coyote
   title: kafka-connect-blockchain
 
 - name: Setup Containers
