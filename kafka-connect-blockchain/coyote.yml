@@ -1,4 +1,4 @@
-- name: coyote
+να το - name: coyote
   title: kafka-connect-blockchain
 
 - name: Setup Containers
@@ -33,7 +33,7 @@
         {
           "name": "blockchain-%UNIQUE_RC%",
           "config": {
-            "connector.class": "com.datamountaineeer.streamreactor.connect.blockchain.source.BlockchainSourceConnector",
+            "connector.class": "com.datamountaineer.streamreactor.connect.blockchain.source.BlockchainSourceConnector",
             "tasks.max": "1",
             "connect.blockchain.source.kafka.topic": "blockchain"
           }
@@ -43,7 +43,7 @@
   entries:
     - name: Read Entries from Topic
       command: >
-        timeout 90
+        timeout 45
         docker run --rm --network=kafkaconnectblockchain_default landoop/fast-data-dev
           kafka-avro-console-consumer --zookeeper fast-data-dev:2181/confluent
                                       --bootstrap-server fast-data-dev:9092
