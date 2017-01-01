@@ -10,7 +10,13 @@ services:
       - RUNTESTS=0
     # ports:
     #   - 3030:3030
+  hazelcast-client:
+    build: ./hazelcast-client
+    image: landoop/hazelcast-client
+    depends_on:
+      - hazelcast
+    command: ["-host", "hazelcast:5701", "-user", "dev", "-pass", "dev-pass", "-query", "sink-index"]
   hazelcast:
     image: hazelcast/hazelcast
-    environment:
-      - JAVA_OPTS=-Dhazelcast.rest.enabled=true
+    # environment:
+    #   - JAVA_OPTS=-Dhazelcast.rest.enabled=true

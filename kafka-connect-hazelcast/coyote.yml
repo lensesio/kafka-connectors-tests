@@ -6,8 +6,12 @@
     - name: Docker Compose Pull
       command: docker-compose pull
       ignore_exit_code: true
+    - name: Docker Compose Build
+      command: docker-compose build
     - name: Docker Compose Up
       command: docker-compose up -d
+    - name: Stop Hazelcast-Client Container
+      command: docker-compose stop hazelcast-client
     - name: Sleep a bit
       command: sleep 60
       nolog: true
@@ -22,7 +26,7 @@
       command: >
         docker run --rm --network=kafkaconnecthazelcast_default landoop/fast-data-dev
           kafka-topics --zookeeper fast-data-dev:2181 --topic hazelcast-sink --partition 1 --replication 1 --create
-    - name: Create a Hazelcast Distributed Connector
+    - name: Create a Hazelcast Distributed Connector using Reliable Topics
       command: >
         docker run --rm --network=kafkaconnecthazelcast_default -i landoop/fast-data-dev
           curl -vs --stderr - -X POST -H "Content-Type: application/json"
@@ -42,11 +46,46 @@
             "connect.hazelcast.sink.group.password": "dev-pass"
           }
         }
+    - name: Create a Hazelcast Distributed Connector using Ring Buffer
+      command: >
+        docker run --rm --network=kafkaconnecthazelcast_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      stdin: |
+        {
+          "name": "hazelcast-sink-rb",
+          "config": {
+            "connector.class": "com.datamountaineer.streamreactor.connect.hazelcast.sink.HazelCastSinkConnector",
+            "tasks.max": "1",
+            "topics": "hazelcast-sink",
+            "connect.hazelcast.sink.cluster.members": "hazelcast",
+            "connect.hazelcast.sink.kcql": "INSERT INTO sink-index-rb SELECT * FROM hazelcast-sink WITHFORMAT JSON STOREAS RING_BUFFER",
+            "connect.hazelcast.sink.group.name": "dev",
+            "connect.hazelcast.sink.group.password": "dev-pass"
+          }
+        }
     - command: sleep 20
       nolog: true
 
 - name: Test Connector
   entries:
+    - name: Write Entries into Topic to Warm Up for Client
+      command: >
+        docker run --rm -i --network=kafkaconnecthazelcast_default landoop/fast-data-dev
+          kafka-avro-console-producer --broker-list fast-data-dev:9092
+            --topic hazelcast-sink --property schema.registry.url="http://fast-data-dev:8081"
+            --property
+            value.schema='{"type":"record","name":"User","namespace":"com.datamountaineer.streamreactor.connect.HazelCast","fields":[{"name":"firstName","type":"string"},{"name":"lastName","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
+      stdin: |
+        {"firstName": "John", "lastName": "Smith", "age":30, "salary": 4830}
+        {"firstName": "Anna", "lastName": "Doe", "age":32, "salary": 5430}
+      timeout: 20s
+    - command: sleep 20
+      nolog: true
+    - name: Start Hazelcast-Client Container
+      command: docker-compose start hazelcast-client
     - name: Write Entries into Topic
       command: >
         docker run --rm -i --network=kafkaconnecthazelcast_default landoop/fast-data-dev
@@ -56,9 +95,18 @@
             value.schema='{"type":"record","name":"User","namespace":"com.datamountaineer.streamreactor.connect.HazelCast","fields":[{"name":"firstName","type":"string"},{"name":"lastName","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
       stdin: |
         {"firstName": "John", "lastName": "Smith", "age":30, "salary": 4830}
+        {"firstName": "Anna", "lastName": "Doe", "age":32, "salary": 5430}
       timeout: 20s
     - command: sleep 20
       nolog: true
+    - name: Verify Reliable Topic Entries
+      command: >
+        docker logs kafkaconnecthazelcast_hazelcast-client_1
+      stdout_has: [ "Reliable Topic.*sink-index.*msg = {\"firstName\":\"(John|Ann)\",\"lastName\":\"(Smith|Doe)\",\"age\":(30|32),\"salary\"" ]
+    - name: Verify Ring Buffer Entries
+      command: >
+        docker logs kafkaconnecthazelcast_hazelcast-client_1
+      stdout_has: [ "Ring Buffer.*sink-index-rb.*msg = {\"firstName\":\"(John|Ann)\",\"lastName\":\"(Smith|Doe)\",\"age\":(30|32),\"salary\"" ]
     - name: Read First 4000 Lines of Connect Logs
       command: >
         docker exec kafkaconnecthazelcast_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
