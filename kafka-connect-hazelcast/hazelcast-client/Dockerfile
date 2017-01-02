@@ -14,7 +14,7 @@ WORKDIR /
 
 # ENTRYPOINT ["/usr/bin/java", "-jar", "/hazelcast-client/target/scala-2.11/hazelcast-client.jar"]
 
-RUN wget https://github.com/Landoop/hazelcast-client/releases/download/0.3/hazelcast-client-0.3.jar \
-         -O /hazelcast-client.jar
+ARG HAZELCAST_CLIENT_URL=https://github.com/Landoop/hazelcast-client/releases/download/0.3/hazelcast-client-0.3.jar
+RUN wget "${HAZELCAST_CLIENT_URL}" -O /hazelcast-client.jar
 
 ENTRYPOINT ["/usr/bin/java", "-jar", "/hazelcast-client.jar" ]
