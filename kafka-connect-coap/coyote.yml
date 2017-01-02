@@ -1,0 +1,73 @@
+- name: coyote
+  title: kafka-connect-coap
+
+- name: Setup Containers
+  entries:
+    - name: Docker Compose Pull
+      command: docker-compose pull
+      ignore_exit_code: true
+    - name: Docker Compose Up
+      command: docker-compose up -d
+    - name: Sleep a bit
+      command: sleep 60
+      nolog: true
+    - name: Check docker compose log
+      command: docker-compose logs
+      stdout_has: [ 'INFO success: broker entered RUNNING state' ]
+      stdout_not_has: [ 'INFO exited: broker' ]
+
+- name: Setup Coap Connector
+  entries:
+    - name: Create Topic
+      command: >
+        docker run --rm --network=kafkaconnectcoap_default landoop/fast-data-dev
+          kafka-topics --zookeeper fast-data-dev:2181 --topic coap --partition 1 --replication 1 --create
+    - name: Create a Coap Distributed Connector
+      # alternative: http://coap.me/
+      command: >
+        docker run --rm --network=kafkaconnectcoap_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      stdin: |
+        {
+          "name": "coap-%UNIQUE_RC%",
+          "config": {
+            "connector.class": "com.datamountaineer.streamreactor.connect.coap.source.CoapSourceConnector",
+            "tasks.max": "1",
+            "topics": "coap",
+            "connect.coap.source.uri": "coap://coap.me:5683",
+            "connect.coap.source.kcql": "INSERT INTO coap SELECT * FROM test"
+          }
+        }
+    - command: sleep 30
+      nolog: true
+
+- name: Test Connector
+  entries:
+    # - name: Send messages
+    #   command: >
+    #     docker exec kafkaconnectcoap_coap_1 /opt/go/bin/client
+    #   timeout: 20s
+    - command: sleep 60
+      nolog: true
+    - name: Read and Verify Entries from Topic
+      command: >
+        timeout 45
+        docker run --rm --network=kafkaconnectcoap_default landoop/fast-data-dev
+          kafka-avro-console-consumer --zookeeper fast-data-dev:2181/confluent
+                                      --bootstrap-server fast-data-dev:9092
+                                      --topic coap --from-beginning --new-consumer
+                                      --property schema.registry.url=http://fast-data-dev:8081
+      ignore_exit_code: true
+      stdout_has: [ 'welcome to the ETSI plugtest' ]
+    - name: Read First 4000 Lines of Connect Logs
+      command: >
+        docker exec kafkaconnectcoap_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
+      stdout_not_has: [ '\] ERROR' ]
+
+- name: Clean-up Containers
+  entries:
+    - name: Docker Compose Down
+      command: docker-compose down
