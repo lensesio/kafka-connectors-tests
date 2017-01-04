@@ -1,0 +1,48 @@
+version: '2'
+services:
+  fast-data-dev:
+    build: ./fast-data-dev-with-deps
+    image: landoop-fast-data-demo/fast-data-dev-with-deps:latest
+    depends_on:
+      - elasticsearch
+    environment:
+      - ADV_HOST=fast-data-dev
+      - FORWARDLOGS=0
+      - RUNTESTS=0
+    ports:
+      - 16781:8081
+      - 16782:8082
+      - 16783:8083
+      - 16784:3030
+  # cassandra:
+  #   build: ../kafka-connect-cassandra/cassandra
+  #   image: landoop-fast-data-demo/cassandra
+  elasticsearch:
+    image: elasticsearch:2.4
+    command: --cluster.name landoop
+  hazelcast:
+    image: hazelcast/hazelcast
+  influxdb:
+    image: influxdb
+    volumes:
+      - ../kafka-connect-influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
+  activemq:
+    build:
+      context: ../kafka-connect-jms/activemq
+      args:
+        ACTIVEMQ_VERSION: 5.14.2
+        ACTIVEMQ_ADMIN: "landoop: landoop, admin"
+        ACTIVEMQ_USER: "test: test, user"
+    image: landoop-fast-data-demo/activemq
+  kudu:
+    build: ../kafka-connect-kudu/kudu
+    image: landoop-fast-data-demo/kudu
+  redis:
+    image: redis
+    volumes:
+      - ../kafka-connect-redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+  rethinkdb:
+    image: rethinkdb
+  mongo:
+    image: mongo
