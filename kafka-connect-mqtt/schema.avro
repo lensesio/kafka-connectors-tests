@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "measurements",
+  "namespace": "com.landoop.test.mqtt",
+  "fields": [
+    {
+      "name": "output",
+      "type": "int"
+    },
+    {
+      "name": "deviceid",
+      "type":"string"
+    }
+  ]
+}

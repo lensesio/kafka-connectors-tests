@@ -1,0 +1,24 @@
+version: '2'
+services:
+  fast-data-dev:
+    build:
+      context: ./fast-data-dev-mqtt-client
+    image: landoop/fast-data-dev-mqtt-client
+    depends_on:
+      - activemq
+    volumes:
+      - ./schema.avro:/schema.avro
+    environment:
+      - ADV_HOST=fast-data-dev
+      - FORWARDLOGS=0
+      - RUNTESTS=0
+    # ports:
+    #   - 3030:3030
+  activemq:
+    build:
+      context: ./activemq
+      args:
+        ACTIVEMQ_VERSION: 5.14.2
+        ACTIVEMQ_ADMIN: "landoop: landoop, admin"
+        ACTIVEMQ_USER: "test: test, user"
+    image: landoop/activemq
