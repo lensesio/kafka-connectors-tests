@@ -18,7 +18,7 @@ services:
     build:
       context: ./activemq
       args:
-        ACTIVEMQ_VERSION: 5.14.2
+        ACTIVEMQ_VERSION: 5.14.4
         ACTIVEMQ_ADMIN: "landoop: landoop, admin"
         ACTIVEMQ_USER: "test: test, user"
     image: landoop/activemq

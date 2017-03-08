@@ -62,8 +62,7 @@
       command: >
         timeout 30
         docker exec kafkaconnectmqtt_fast-data-dev_1
-          kafka-avro-console-consumer --zookeeper fast-data-dev:2181/confluent
-                                      --bootstrap-server fast-data-dev:9092
+          kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
                                       --topic mqtt-source --from-beginning --new-consumer
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
