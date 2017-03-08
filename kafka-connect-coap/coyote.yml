@@ -38,7 +38,7 @@
             "tasks.max": "1",
             "topics": "coap",
             "connect.coap.source.uri": "coap://coap.me:5683",
-            "connect.coap.source.kcql": "INSERT INTO coap SELECT * FROM test"
+            "connect.coap.kcql": "INSERT INTO coap SELECT * FROM test"
           }
         }
     - command: sleep 30
@@ -56,8 +56,7 @@
       command: >
         timeout 45
         docker run --rm --network=kafkaconnectcoap_default landoop/fast-data-dev
-          kafka-avro-console-consumer --zookeeper fast-data-dev:2181/confluent
-                                      --bootstrap-server fast-data-dev:9092
+          kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
                                       --topic coap --from-beginning --new-consumer
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
