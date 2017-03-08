@@ -3,7 +3,7 @@ MAINTAINER Marios Andreopoulos <marios@landoop.com>
 
 ENV GOPATH=/opt/go PATH=$PATH:/opt/go/bin
 ADD main.go /opt/go/src/landoop/activemq-test/
-RUN apk add --no-cache go git \
+RUN apk add --no-cache go git build-base \
     && cd /opt/go/src/landoop/activemq-test/ \
     && go get -v \
     && go build -v \
