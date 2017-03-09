@@ -8,5 +8,6 @@ services:
       - FORWARDLOGS=0
       - RUNTESTS=0
       - DISABLE=hbase
+      - RUN_AS_ROOT=1
     ports:
       - 3030:3030
