@@ -13,7 +13,7 @@
     - name: Stop Hazelcast-Client Container
       command: docker-compose stop hazelcast-client
     - name: Sleep a bit
-      command: sleep 60
+      command: sleep 70
       nolog: true
     - name: Check docker compose log
       command: docker-compose logs
