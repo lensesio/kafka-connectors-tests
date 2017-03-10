@@ -32,6 +32,8 @@ TEST_NAME="$(basename "$TEST_DIR")"
 
 # Download latest Coyote
 COYOTE=coyote-1.1-linux-amd64
+echo "7d4168b123777ff36d5c55be6795a5feb521982857a5b2ca40bae3fbeab2aa2d252d597581e80eb0fb3733888b4019892561c596fc1b364f06dcb0c8ebb7196e  $COYOTE" \
+    | sha512sum -c || rm -f "$COYOTE"
 wget -nc https://archive.landoop.com/tools/coyote/1.1/$COYOTE
 chmod +x $COYOTE
 
@@ -46,7 +48,7 @@ set +e
 FILES_CHANGED="$(grep -rl 'landoop/fast-data-dev:latest' .)"
 echo "$FILES_CHANGED" | xargs sed "s|landoop/fast-data-dev:latest|landoop/fast-data-dev:$TEST_VERSION|g" -i
 sed -e "s/$TEST_NAME/$TEST_NAME $TEST_VERSION/" -i coyote.yml
-"$WORKSPACE/$COYOTE"
+"$WORKSPACE/$COYOTE" -json-out results.json
 EXITCODE="$?"
 [[ ! -z "$FILES_CHANGED" ]] && echo "$FILES_CHANGED"  | xargs git checkout --
 git checkout -- coyote.yml
@@ -70,8 +72,10 @@ echo "$EXITCODE" > "$WORKSPACE"/exitcode
 mkdir -p "$RESULTS_DIR"
 DATE="$(date '+%Y%m%d-%H%M')"
 cp "$TEST_DIR"/coyote.html "$RESULTS_DIR"/"$(basename ${TEST_DIR})-${DATE}$(cat status.txt).html"
+cp "$TEST_DIR"/results.json "$RESULTS_DIR"/"$(basename ${TEST_DIR})-${DATE}$(cat status.txt).json"
 rm -f latest.html
 mv "$TEST_DIR"/coyote.html latest.html
+mv "$TEST_DIR"/results.json results.json
 ln -s latest.html index.html
 
 # Create index page for test
