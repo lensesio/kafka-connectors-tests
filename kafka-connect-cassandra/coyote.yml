@@ -58,7 +58,8 @@
             "connect.cassandra.import.mode": "incremental",
             "connect.cassandra.contact.points": "cassandra",
             "connect.cassandra.username": "cassandra",
-            "connect.cassandra.password": "cassandra"
+            "connect.cassandra.password": "cassandra",
+            "connect.cassandra.assigned.tables": "orders"
           }
         }
 
