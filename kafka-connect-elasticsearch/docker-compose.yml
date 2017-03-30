@@ -1,0 +1,17 @@
+version: '2'
+services:
+  fast-data-dev:
+    image: landoop/fast-data-dev:latest
+    depends_on:
+      - elasticsearch
+    environment:
+      - ADV_HOST=fast-data-dev
+      - FORWARDLOGS=0
+      - RUNTESTS=0
+    # ports:
+    #   - 3030:3030
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.3.0
+    environment:
+      - cluster.name=landoop
+      - "ES_JAVA_OPTS=-Xms768m -Xmx768m"

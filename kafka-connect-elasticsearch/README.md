@@ -1,9 +1,8 @@
-# kafka-connect-elastic test #
+# kafka-connect-elasticsearch test #
 
-This is the test for Datamountaineer's Elastic Search connector (provided
-by the Stream Reactor repo).
+This is the test for Confluent's ElasticSearch connector.
 
-Most recent report: <http://coyote.landoop.com/connect/kafka-connect-elastic/>
+Most recent report: <http://coyote.landoop.com/connect/kafka-connect-elasticsearch/>
 
 ---
 
