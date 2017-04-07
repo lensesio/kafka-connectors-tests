@@ -18,7 +18,7 @@
       stdout_has: [ 'INFO success: broker entered RUNNING state' ]
       stdout_not_has: [ 'INFO exited: broker' ]
 
-- name: Setup JMS (ActiveMQ) Connector
+- name: Setup JMS Sink (ActiveMQ) Connector
   entries:
     - name: Create Kafka Topic
       command: >
@@ -52,7 +52,7 @@
     - command: sleep 30
       nolog: true
 
-- name: Test Connector
+- name: Test JMS Sink Connector
   entries:
     - name: Write Entries into Topic
       command: >
@@ -65,15 +65,75 @@
         {"firstName": "John", "lastName": "Smith", "age":30, "salary": 4830}
         {"firstName": "Anna", "lastName": "Jones", "age":28, "salary": 5430}
       timeout: 20s
-    - command: sleep 30
+    - command: sleep 40
       nolog: true
     - name: Read activemq-test logs to verify messages were passed
       command: >
         docker exec kafkaconnectjms_fast-data-dev_1 cat /var/log/activemq-test.log
       stdout_has: [ 'John', 'Smith', 'Anna', 'Jones' ]
-    - name: Read First 4000 Lines of Connect Logs
+
+- name: Setup JMS (ActiveMQ) Source Connector
+  entries:
+    - name: Create Kafka Topic
       command: >
-        docker exec kafkaconnectjms_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
+        docker run --rm --network=kafkaconnectjms_default landoop/fast-data-dev
+          kafka-topics --zookeeper fast-data-dev:2181 --topic jms-source --partition 1 --replication 1 --create
+    - name: Kill sink test listener so our connector can attacht to the topic
+      command: >
+        docker exec -d kafkaconnectjms_fast-data-dev_1 killall activemq-test
+    - name: Create a JMS Distributed Connector
+      command: >
+        docker run --rm --network=kafkaconnectjms_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      stdin: |
+        {
+          "name": "jms-source",
+          "config": {
+            "connector.class": "com.datamountaineer.streamreactor.connect.jms.source.JMSSourceConnector",
+            "tasks.max": "1",
+            "connect.jms.url": "tcp://activemq:61616",
+            "connect.jms.connection.factory": "ConnectionFactory",
+            "connect.jms.initial.context.factory": "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+            "connect.jms.kcql": "INSERT INTO jms-source SELECT * FROM connect_topic",
+            "connect.jms.topics": "connect_topic"
+          }
+        }
+    - command: sleep 30
+      nolog: true
+
+- name: Test JMS Source Connector
+  entries:
+    - name: Write Entries into Topic
+      command: >
+        docker run --rm -i --network=kafkaconnectjms_default landoop/fast-data-dev
+          kafka-avro-console-producer --broker-list fast-data-dev:9092
+            --topic jms-sink --property schema.registry.url="http://fast-data-dev:8081"
+            --property
+            value.schema='{"type":"record","name":"User","namespace":"com.datamountaineer.streamreactor.connect.jms","fields":[{"name":"firstName","type":"string"},{"name":"lastName","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
+      stdin: |
+        {"firstName": "John", "lastName": "Smith", "age":30, "salary": 4830}
+        {"firstName": "Anna", "lastName": "Jones", "age":28, "salary": 5430}
+      timeout: 20s
+    - command: sleep 40
+      nolog: true
+    - name: Read Entries from Topic
+      command: >
+        timeout 20
+        docker run --rm --network=kafkaconnectjms_default landoop/fast-data-dev
+          kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
+                                      --topic jms-source --from-beginning --new-consumer
+                                      --property schema.registry.url=http://fast-data-dev:8081
+      ignore_exit_code: true
+      stdout_has: [ 'John', 'Smith', 'Anna', 'Jones' ]
+
+- name: Other tests
+  entries:
+    - name: Read First 6000 Lines of Connect Logs
+      command: >
+        docker exec kafkaconnectjms_fast-data-dev_1 head -n6000 /var/log/connect-distributed.log
       stdout_not_has: [ '\] ERROR' ]
 
 - name: Clean-up Containers
