@@ -14,6 +14,8 @@ services:
       - 16782:8082
       - 16783:8083
       - 16784:3030
+    args:
+      ACTIVEMQ_VERSION: 5.14.4
   # cassandra:
   #   build: ../kafka-connect-cassandra/cassandra
   #   image: landoop-fast-data-demo/cassandra
@@ -30,7 +32,7 @@ services:
     build:
       context: ../kafka-connect-jms/activemq
       args:
-        ACTIVEMQ_VERSION: 5.14.2
+        ACTIVEMQ_VERSION: 5.14.4
         ACTIVEMQ_ADMIN: "landoop: landoop, admin"
         ACTIVEMQ_USER: "test: test, user"
     image: landoop-fast-data-demo/activemq

@@ -1,4 +1,4 @@
-FROM landoop/fast-data-dev:latest
+FROM landoop/fast-data-dev:cp3.2
 MAINTAINER Marios Andreopoulos <marios@landoop.com>
 
 ARG ACTIVEMQ_VERSION="5.14.2"

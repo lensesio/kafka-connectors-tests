@@ -194,12 +194,11 @@
             "connector.class": "com.datamountaineer.streamreactor.connect.jms.sink.JMSSinkConnector",
             "tasks.max": "1",
             "topics": "yahoo-fx",
-            "connect.jms.sink.url": "tcp://activemq:61616",
-            "connect.jms.sink.connection.factory": "org.apache.activemq.ActiveMQConnectionFactory",
-            "connect.jms.sink.kcql": "INSERT INTO yahoo_fx SELECT * FROM yahoo-fx",
-            "connect.jms.sink.message.type": "AVRO",
-            "connect.jms.error.policy": "THROW",
-            "connect.jms.sink.export.route.topics": "yahoo_fx"
+            "connect.jms.url": "tcp://activemq:61616",
+            "connect.jms.connection.factory": "ConnectionFactory",
+            "connect.jms.initial.context.factory": "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+            "connect.jms.kcql": "INSERT INTO yahoo_fx SELECT * FROM yahoo-fx",
+            "connect.jms.topics": "yahoo_fx"
           }
         }
     - command: sleep 30
