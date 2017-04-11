@@ -96,7 +96,7 @@
             "tasks.max": "1",
             "topics": "yahoo-fx",
             "connect.hazelcast.sink.cluster.members": "hazelcast",
-            "connect.hazelcast.sink.kcql": "INSERT INTO yahoo-fx SELECT * FROM yahoo-fx WITHFORMAT JSON BATCH 100",
+            "connect.hazelcast.sink.kcql": "INSERT INTO yahoo-fx SELECT * FROM yahoo-fx WITHFORMAT JSON",
             "connect.hazelcast.sink.group.name": "dev",
             "connect.hazelcast.sink.group.password": "dev-pass"
           }
