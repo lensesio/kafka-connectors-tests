@@ -1,7 +1,10 @@
 version: '2'
 services:
   fast-data-dev:
-    build: ./fast-data-dev-with-deps
+    build:
+      context: ./fast-data-dev-with-deps
+      args:
+        ACTIVEMQ_VERSION: 5.14.4
     image: landoop-fast-data-demo/fast-data-dev-with-deps:latest
     depends_on:
       - elasticsearch
@@ -14,8 +17,6 @@ services:
       - 16782:8082
       - 16783:8083
       - 16784:3030
-    args:
-      ACTIVEMQ_VERSION: 5.14.4
   # cassandra:
   #   build: ../kafka-connect-cassandra/cassandra
   #   image: landoop-fast-data-demo/cassandra
