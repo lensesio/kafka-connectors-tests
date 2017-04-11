@@ -168,7 +168,7 @@
             "connect.influx.connection.password": "landoop",
             "connect.influx.connection.database": "landoop",
             "connect.influx.retention.policy": "default",
-            "connect.influx.sink.route.query": "INSERT INTO stocks-trade SELECT last_trade_size, last_trade_time FROM yahoo-stocks WITHTIMESTAMP last_trade_time"
+            "connect.influx.sink.kcql": "INSERT INTO stocks-trade SELECT last_trade_size, last_trade_time FROM yahoo-stocks WITHTIMESTAMP last_trade_time"
           }
         }
     - command: sleep 30
