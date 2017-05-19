@@ -2,6 +2,8 @@
 
 Most recent report: <http://coyote.landoop.com/connect/kafka-connect-jms/>
 
+This test is compatible with the v0.2.5 release of Stream Reactor.
+
 ---
 
 ## Usage

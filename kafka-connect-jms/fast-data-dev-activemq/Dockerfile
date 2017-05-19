@@ -9,7 +9,7 @@ RUN apk add --no-cache go git build-base \
     && go build -v \
     && apk del --no-cache git go pcre
 
-ARG ACTIVEMQ_VERSION="5.14.2"
+ARG ACTIVEMQ_VERSION="5.14.5"
 RUN wget "http://apache.mirrors.ovh.net/ftp.apache.org/dist/activemq/${ACTIVEMQ_VERSION}/apache-activemq-${ACTIVEMQ_VERSION}-bin.tar.gz" \
             -O /activemq.tgz \
     && mkdir -p /opt/activemq \
