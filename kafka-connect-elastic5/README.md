@@ -6,6 +6,8 @@ Elastic Search protocol (port 9300), hence the need for two different versions.
 
 Most recent report: <http://coyote.landoop.com/connect/kafka-connect-elastic5/>
 
+_TODO: Enable elastic search security (xpack) for the test_
+
 ---
 
 ## Usage
