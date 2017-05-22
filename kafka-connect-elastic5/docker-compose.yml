@@ -1,0 +1,26 @@
+version: '2'
+services:
+  fast-data-dev:
+    image: landoop/fast-data-dev:latest
+    depends_on:
+      - elasticsearch
+    environment:
+      - ADV_HOST=fast-data-dev
+      - FORWARDLOGS=0
+      - RUNTESTS=0
+      - DISABLE=elastic,cassandra
+    # ports:
+    #   - 3030:3030
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.0
+    environment:
+      - cluster.name=landoop
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+
