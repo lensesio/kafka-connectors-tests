@@ -1,0 +1,94 @@
+- name: coyote
+  title: kafka-connect-dbvisitreplicate
+
+- name: Setup Containers
+  entries:
+    - name: Download Test Files
+      command: wget https://archive.landoop.com/third-party/dbvisit-replicate-testset/dbvisit-replicate.tbz -O dbvisit-replicate.tbz
+    - name: Extract Test Files
+      command: tar xvf dbvisit-replicate.tbz
+    - name: Docker Compose Pull
+      command: docker-compose pull
+      ignore_exit_code: true
+    - name: Docker Compose Up
+      command: docker-compose up -d
+    - name: Sleep a bit
+      command: sleep 70
+      nolog: true
+    - name: Check docker compose log
+      command: docker-compose logs
+      stdout_has: [ 'INFO success: broker entered RUNNING state' ]
+      stdout_not_has: [ 'INFO exited: broker' ]
+
+- name: Setup Dbvisit Replicator Connector
+  entries:
+    - name: Create Topics with Longer Retention Periods than Default
+      # This will be good until ~2 Dec 2021. Sample messages were produced on 2 Dec 2016
+      command: >
+        docker exec kafkaconnectdbvisitreplicate_fast-data-dev_1 bash -c
+        '
+        for i in REP-SOE.{ADDRESSES,CARD_DETAILS,CUSTOMERS,LOGON,INVENTORIES,ORDERS,ORDER_ITEMS,INFO}; do
+            kafka-topics --zookeeper localhost:2181 --create --topic $i --config retention.ms=157788000000 --partitions 1 --replication-factor 1;
+        done
+        '
+    - name: Create a Dbvisit Replicator Connector
+      command: >
+        docker run --rm --network=kafkaconnectdbvisitreplicate_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      stdin: |
+        {
+          "name": "dbvisit-replicate",
+          "config": {
+            "connector.class": "com.dbvisit.replicate.kafkaconnect.ReplicateSourceConnector",
+            "tasks.max": "1",
+            "plog.health.check.interval": "10",
+            "plog.scan.offline.interval": "100",
+            "plog.scan.interval.count": "5",
+            "plog.data.flush.size": "1000",
+            "plog.interval.time.ms": "500",
+            "connector.publish.transaction.info": "true",
+            "connector.publish.cdc.format": "changerow",
+            "topic.prefix": "REP-",
+            "connector.publish.keys": "false",
+            "plog.location.uri": "file:/connectors",
+            "connector.publish.no.schema.evolution": "true",
+            "topic.name.transaction.info": "TX.INFO"
+          }
+        }
+
+- name: Test Connector
+  entries:
+    - command: sleep 60
+      nolog: true
+    - name: Read Entries from Addresses Topic
+      command: >
+        timeout 20
+        docker exec kafkaconnectdbvisitreplicate_fast-data-dev_1
+          kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
+                                      --topic REP-SOE.ADDRESSES --from-beginning --new-consumer
+                                      --property schema.registry.url=http://fast-data-dev:8081
+      ignore_exit_code: true
+      stdout_has: [ 'Workington', 'Devon', 'Finland', 'Scunthorpe.*Bath.*Israel', 'Milnathort.*Pembrokeshire.*Denmark' ]
+    - name: Read Entries from Orders Topic
+      command: >
+        timeout 20
+        docker exec kafkaconnectdbvisitreplicate_fast-data-dev_1
+          kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
+                                      --topic REP-SOE.ORDERS --from-beginning --new-consumer
+                                      --property schema.registry.url=http://fast-data-dev:8081
+      ignore_exit_code: true
+      stdout_has: [ 'INSERT.*1690010000463.*844680.*1480706004383.*online.*17.*1.*440.*Standard.*3.*ship_asap.*177.*Occasional.*20.*177', '0002\.00a\.00009a98.*UPDATE.*1690010001020.*844707.*1480706014290.*online.*8.*1.*¾\$.*983.*Standard.*5.*ship_asap.*77.*Occasional.*112' ]
+    - name: Read First 5000 Lines of Connect Logs
+      command: >
+        docker exec kafkaconnectdbvisitreplicate_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
+      stdout_not_has: [ '\] ERROR' ]
+
+- name: Clean-up Containers
+  entries:
+    - name: Docker Compose Down
+      command: docker-compose down
+    - name: Remove testset files
+      command: rm -rf dbvisit-replicate dbvisit-replicate.tbz
