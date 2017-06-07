@@ -1,0 +1,17 @@
+version: '2'
+services:
+  fast-data-dev:
+    build: ./fast-data-dev-couchbase-connector
+    image: landoop/fast-data-dev-couchbase-connector
+    depends_on:
+      - couchbase
+    environment:
+      - ADV_HOST=fast-data-dev
+      - FORWARDLOGS=0
+      - RUNTESTS=0
+    # ports:
+    #   - 3030:3030
+  couchbase:
+    image: couchbase:community-4.5.1
+
+

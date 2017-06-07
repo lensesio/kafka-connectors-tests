@@ -1,0 +1,186 @@
+- name: coyote
+  title: kafka-connect-couchbase
+
+- name: Setup Containers
+  entries:
+    - name: Docker Compose Pull
+      command: docker-compose pull
+      ignore_exit_code: true
+    - name: Docker Compose Build
+      command: docker-compose build
+    - name: Docker Compose Up
+      command: docker-compose up -d
+    - name: Sleep a bit
+      command: sleep 60
+      nolog: true
+    - name: Check docker compose log
+      command: docker-compose logs
+      stdout_has: [ 'INFO success: broker entered RUNNING state' ]
+      stdout_not_has: [ 'INFO exited: broker' ]
+
+- name: Setup Couchbase Connectors
+  entries:
+    - name: Create Sink Topic
+      command: >
+        docker run --rm --network=kafkaconnectcouchbase_default landoop/fast-data-dev
+          kafka-topics --zookeeper fast-data-dev:2181 --topic couchbase-sink --partition 1 --replication 1 --create
+#          --config cleanup.policy=compact
+    - name: Create Source Topic
+      command: >
+        docker run --rm --network=kafkaconnectcouchbase_default landoop/fast-data-dev
+          kafka-topics --zookeeper fast-data-dev:2181 --topic couchbase-source --partition 1 --replication 1 --create
+    - name: Initialize Couchbase
+      command: >
+        docker exec kafkaconnectcouchbase_couchbase_1
+          couchbase-cli cluster-init
+            --cluster-username=landoop
+            --cluster-password=landoop
+            --services=data,index,query,fts
+            --cluster-ramsize=256
+            --cluster-index-ramsize=400
+            --cluster-fts-ramsize=256
+            --index-storage-setting=default
+    - command: sleep 10
+      nolog: true
+    - name: Create Couchbase Default Bucket
+      command: >
+        docker exec kafkaconnectcouchbase_couchbase_1
+          couchbase-cli bucket-create
+            -c couchbase -u landoop -p landoop
+            --bucket=default
+            --bucket-type=couchbase
+            --bucket-ramsize=100
+            --bucket-replica=1
+            --wait
+    - name: Create Primary Index on  Default Bucket
+      command: docker exec -i kafkaconnectcouchbase_couchbase_1 cbq
+      stdin: CREATE PRIMARY INDEX ON default;
+    - name: Create a CouchbaseDB Distributed Source Connector
+      command: >
+        docker run --rm --network=kafkaconnectcouchbase_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      stdin: |
+        {
+          "name": "couchbase-source",
+          "config": {
+            "connector.class": "com.couchbase.connect.kafka.CouchbaseSourceConnector",
+            "connection.bucket": "default",
+            "tasks.max": "1",
+            "topic.name": "couchbase-source",
+            "connection.cluster_address": "couchbase"
+            }
+        }
+    - name: Create a CouchbaseDB Distributed Sink Connector
+      command: >
+        docker run --rm --network=kafkaconnectcouchbase_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      stdin: |
+        {
+          "name": "couchbase-sink",
+          "config": {
+            "connector.class": "com.couchbase.connect.kafka.CouchbaseSinkConnector",
+            "connection.bucket": "default",
+            "topics": "couchbase-sink",
+            "tasks.max": "1",
+            "connection.cluster_address": "couchbase"
+           }
+        }
+    - command: sleep 30
+      nolog: true
+
+- name: Test Connectors
+  entries:
+    - name: Write Basic Entries into Sink Topic
+      command: >
+        docker run --rm -i --network=kafkaconnectcouchbase_default landoop/fast-data-dev
+          kafka-avro-console-producer --broker-list fast-data-dev:9092
+            --topic couchbase-sink --property schema.registry.url="http://fast-data-dev:8081"
+            --property
+            value.schema='{"type":"record","name":"User","fields":[{"name":"firstName","type":"string"},{"name":"lastName","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
+            --property parse.key=true --property key.separator=|
+            --property key.schema='{"type":"string"}'
+      stdin: |
+        "Smith"|{"firstName": "John", "lastName": "Smith", "age":30, "salary": 4830}
+        "Jones"|{"firstName": "Anna", "lastName": "Jones", "age":28, "salary": 5430}
+        "UpdateSource"|{"firstName": "Peter", "lastName": "UpdateSource", "age":32, "salary": 4330}
+        "DeleteSource"|{"firstName": "Petra", "lastName": "DeleteSource", "age":29, "salary": 3430}
+        "UpdateSink"|{"firstName": "Wally", "lastName": "UpdateSink", "age":33, "salary": 4210}
+        "DeleteSink"|{"firstName": "Jamie", "lastName": "DeleteSink", "age":27, "salary": 3950}
+      timeout: 20s
+    - command: sleep 5
+      nolog: true
+    - name: Write CDC Update Entry into Sink Topic
+      command: >
+        docker run --rm -i --network=kafkaconnectcouchbase_default landoop/fast-data-dev
+          kafka-avro-console-producer --broker-list fast-data-dev:9092
+            --topic couchbase-sink --property schema.registry.url="http://fast-data-dev:8081"
+            --property
+            value.schema='{"type":"record","name":"User","fields":[{"name":"firstName","type":"string"},{"name":"lastName","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
+            --property parse.key=true --property key.separator=|
+            --property key.schema='{"type":"string"}'
+      stdin: |
+        "UpdateSink"|{"firstName": "Wa-updated-lly", "lastName": "UpdateSink", "age":33, "salary": 4210}
+      timeout: 20s
+    ## We can't delete messages yet. Possibly to delete we have to send a message with null value
+    ## (and maybe set the topic cleanup policy to compact, but current command line tools can't
+    ## sent an avro message with null value. kafka-console-producer can sent a null value but can't serialize the key to avro.
+    # - name: Write CDC Delete Entry into Topic
+    #   command: >
+    #     docker run --rm -i --network=kafkaconnectcouchbase_default landoop/fast-data-dev
+    #       kafka-avro-console-producer --broker-list fast-data-dev:9092
+    #         --topic couchbase-sink --property schema.registry.url="http://fast-data-dev:8081"
+    #         --property
+    #         value.schema='{"type":"record","name":"User","fields":[{"name":"firstName","type":"string"},{"name":"lastName","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
+    #         --property parse.key=true --property key.separator=|
+    #         --property key.schema='{"type":"string"}'
+    #   stdin: |
+    #     "DeleteSink"|
+    #   timeout: 20s
+    - name: Write CDC Update and Delete Entries into Bucket
+      command: docker exec -i kafkaconnectcouchbase_couchbase_1 cbq
+      stdin: |
+        UPDATE default d USE KEYS "UpdateSource" SET firstName = "Pe-updated-ter";
+        DELETE FROM default d USE KEYS "DeleteSource";
+    - name: Verify Basic Source and Sink (read from source topic)
+      command: >
+        timeout 10
+        docker run --rm --network=kafkaconnectcouchbase_default landoop/fast-data-dev
+          kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
+                                      --topic couchbase-source --from-beginning --new-consumer
+                                      --property schema.registry.url=http://fast-data-dev:8081
+      ignore_exit_code: true
+      stdout_has: [ 'Smith.*John.*Smith.*30.*4830', 'Jones.*Anna.*Jones.*28.*5430', 'DeleteSink.*Jamie.*DeleteSink.*27.*3950' ]
+    - name: Verify Sink CDC Update (read from source topic)
+      command: docker exec -i kafkaconnectcouchbase_couchbase_1 cbq
+      stdin: SELECT firstName FROM default d WHERE lastName = "UpdateSink";
+      stdout_has: [ 'Wa-updated-lly' ]
+      stdout_not_has: [ 'Wally' ]
+    - name: Verify Source (bucket) CDC Update (read from source topic)
+      command: >
+        timeout 10
+        docker run --rm --network=kafkaconnectcouchbase_default landoop/fast-data-dev
+          kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
+                                      --topic couchbase-source --from-beginning --new-consumer
+                                      --property schema.registry.url=http://fast-data-dev:8081
+      ignore_exit_code: true
+      ## When we update the source, couchbase re-orders the fiels (alphabetically probably?)
+      stdout_has:
+        - 'UpdateSource.*Peter.*UpdateSource.*32.*4330'
+        - 'UpdateSource.*32.*Pe-updated-ter.*UpdateSource.*4330'
+        - 'DeleteSource.*Petra.*DeleteSource.*29.*3430'
+        - 'deletion.*DeleteSource'
+    - name: Read First 5000 Lines of Connect Logs
+      command: >
+        docker exec kafkaconnectcouchbase_fast-data-dev_1 head -n5000 /var/log/connect-distributed.log
+      stdout_not_has: [ '\] ERROR' ]
+
+- name: Clean-up Containers
+  entries:
+    - name: Docker Compose Down
+      command: docker-compose down
