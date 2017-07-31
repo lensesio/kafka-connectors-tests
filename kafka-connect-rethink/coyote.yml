@@ -70,7 +70,8 @@
             "connect.rethink.source.db": "landoop",
             "connect.rethink.source.host": "rethinkdb",
             "connect.rethink.source.port": "28015",
-            "connect.rethink.source.kcql": "INSERT INTO rethink-source SELECT * FROM connect_test"
+            "connect.rethink.kcql": "INSERT INTO rethink-source SELECT * FROM connect_test",
+            "connect.deprecated.fields.to.remove": "connect.rethink.source.kcql"
            }
         }
     - command: sleep 30
