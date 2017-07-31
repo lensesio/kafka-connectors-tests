@@ -94,9 +94,11 @@
             "topics": "cassandra-sink",
             "connect.cassandra.key.space": "sink",
             "connect.cassandra.sink.kcql": "INSERT INTO orders SELECT * FROM cassandra-sink",
+            "connect.cassandra.kcql": "INSERT INTO orders SELECT * FROM cassandra-sink",
             "connect.cassandra.contact.points": "cassandra",
             "connect.cassandra.username": "cassandra",
-            "connect.cassandra.password": "cassandra"
+            "connect.cassandra.password": "cassandra",
+            "connect.deprecated.fields.to.remove": "connect.cassandra.sink.kcql"
           }
         }
     - command: sleep 30
