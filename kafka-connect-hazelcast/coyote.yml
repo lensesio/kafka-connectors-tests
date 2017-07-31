@@ -61,9 +61,14 @@
             "tasks.max": "1",
             "topics": "hazelcast-sink",
             "connect.hazelcast.sink.cluster.members": "hazelcast",
+            "connect.hazelcast.cluster.members": "hazelcast",
             "connect.hazelcast.sink.kcql": "INSERT INTO sink-index-rb SELECT * FROM hazelcast-sink WITHFORMAT JSON STOREAS RING_BUFFER",
+            "connect.hazelcast.kcql": "INSERT INTO sink-index-rb SELECT * FROM hazelcast-sink WITHFORMAT JSON STOREAS RING_BUFFER",
             "connect.hazelcast.sink.group.name": "dev",
-            "connect.hazelcast.sink.group.password": "dev-pass"
+            "connect.hazelcast.group.name": "dev",
+            "connect.hazelcast.sink.group.password": "dev-pass",
+            "connect.hazelcast.group.password": "dev-pass",
+            "connect.deprecated.fields.to.remove": "connect.hazelcast.sink.cluster.members, connect.hazelcast.sink.kcql, connect.hazelcast.sink.group.name, connect.hazelcast.sink.group.password"
           }
         }
     - command: sleep 20

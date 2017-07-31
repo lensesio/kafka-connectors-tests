@@ -48,7 +48,8 @@
             "connect.mongo.sink.batch.size": "10",
             "connect.mongo.batch.size": "10",
             "connect.mongo.sink.kcql": "INSERT INTO orders SELECT * FROM mongo-sink",
-            "connect.depracated.fields.to.remove": "connect.mongo.database, connect.mongo.sink.batch.size"
+            "connect.mongo.kcql": "INSERT INTO orders SELECT * FROM mongo-sink",
+            "connect.depracated.fields.to.remove": "connect.mongo.database, connect.mongo.sink.batch.size, connect.mongo.sink.kcql"
           }
         }
     - command: sleep 30
