@@ -43,9 +43,12 @@
             "tasks.max": "1",
             "topics": "mongo-sink",
             "connect.mongo.database": "landoop",
+            "connect.mongo.db": "landoop",
             "connect.mongo.connection": "mongodb://mongo:27017/landoop",
             "connect.mongo.sink.batch.size": "10",
-            "connect.mongo.sink.kcql": "INSERT INTO orders SELECT * FROM mongo-sink"
+            "connect.mongo.batch.size": "10",
+            "connect.mongo.sink.kcql": "INSERT INTO orders SELECT * FROM mongo-sink",
+            "connect.depracated.fields.to.remove": "connect.mongo.database, connect.mongo.sink.batch.size"
           }
         }
     - command: sleep 30
