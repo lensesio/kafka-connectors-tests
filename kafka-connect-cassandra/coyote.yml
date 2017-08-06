@@ -55,10 +55,12 @@
             "tasks.max": "1",
             "connect.cassandra.key.space": "source",
             "connect.cassandra.source.kcql": "INSERT INTO cassandra-source SELECT * FROM orders PK created",
+            "connect.cassandra.kcql": "INSERT INTO cassandra-source SELECT * FROM orders PK created",
             "connect.cassandra.import.mode": "incremental",
             "connect.cassandra.contact.points": "cassandra",
             "connect.cassandra.username": "cassandra",
-            "connect.cassandra.password": "cassandra"
+            "connect.cassandra.password": "cassandra",
+            "connect.deprecated.fields.to.remove": "connect.cassandra.source.kcql"
           }
         }
 
