@@ -44,13 +44,16 @@
             "connect.mqtt.connection.clean": "true",
             "connect.mqtt.connection.timeout": "1000",
             "connect.mqtt.source.kcql": "INSERT INTO mqtt-source SELECT * FROM /topic/connect_topic",
+            "connect.mqtt.kcql": "INSERT INTO mqtt-source SELECT * FROM /topic/connect_topic",
             "connect.mqtt.connection.keep.alive": "1000",
             "connect.mqtt.source.converters": "/topic/connect_topic=com.datamountaineer.streamreactor.connect.converters.source.AvroConverter",
             "connect.source.converter.avro.schemas": "/topic/connect_topic=/schema.avro",
             "connect.mqtt.client.id": "dm_source_id,",
             "connect.mqtt.converter.throw.on.error": "true",
             "connect.mqtt.hosts": "tcp://activemq:1883",
-            "connect.mqtt.service.quality": "1"
+            "connect.mqtt.connections.host": "tcp://activemq:1883",
+            "connect.mqtt.service.quality": "1",
+            "connect.deprecated.fields.to.remove": "connect.mqtt.hosts, connect.mqtt.source.url"
           }
         }
     - command: sleep 30

@@ -20,6 +20,6 @@ services:
       - hazelcast
     command: ["-host", "hazelcast:5701", "-user", "dev", "-pass", "dev-pass", "-query", "sink-index"]
   hazelcast:
-    image: hazelcast/hazelcast
+    image: hazelcast/hazelcast:3.7.2
     # environment:
     #   - JAVA_OPTS=-Dhazelcast.rest.enabled=true
