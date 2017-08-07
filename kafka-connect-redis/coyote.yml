@@ -39,7 +39,9 @@
             "connect.redis.connection.host": "redis",
             "connect.redis.connection.port": "6379",
             "connect.redis.connection.password": "pass",
-            "connect.redis.sink.kcql": "SELECT firstName, lastName, salary from person_redis PK lastName"
+            "connect.redis.sink.kcql": "SELECT firstName, lastName, salary from person_redis PK lastName",
+            "connect.redis.kcql": "SELECT firstName, lastName, salary from person_redis PK lastName",
+            "connect.deprecated.fields.to.remove": "connect.redis.sink.kcql"
           }
         }
     - command: sleep 30
