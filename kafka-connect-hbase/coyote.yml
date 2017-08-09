@@ -51,7 +51,7 @@
             "connect.hbase.sink.column.family": "d",
             "connect.hbase.column.family": "d",
             "connect.hbase.sink.kcql": "INSERT INTO person SELECT * FROM hbase-sink",
-            "connect.hbase.kcql": "INSERT INTO person SELECT * FROM hbase-sink"
+            "connect.hbase.kcql": "INSERT INTO person SELECT * FROM hbase-sink",
             "connect.deprecated.fields.to.remove": "connect.hbase.sink.kcql, connect.hbase.sink.column.family"
           }
         }
