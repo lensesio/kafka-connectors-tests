@@ -57,7 +57,7 @@
             "tasks.max": "1",
             "topics": "influxdb-sink",
             "connect.influx.connection.url": "http://influxdb:8086",
-            "connect.influx.uri": "http://influxdb:8086",
+            "connect.influx.url": "http://influxdb:8086",
             "connect.influx.connection.user": "landoop",
             "connect.influx.username": "landoop",
             "connect.influx.connection.password": "landoop",
