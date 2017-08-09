@@ -35,7 +35,7 @@
         {
           "name": "elastic-sink",
           "config": {
-            "connector.class": "com.datamountaineer.streamreactor.connect.elastic.ElasticSinkConnector",
+            "connector.class": "com.datamountaineer.streamreactor.connect.elastic5.ElasticSinkConnector",
             "tasks.max": "1",
             "topics": "elastic-sink",
             "connect.elastic.url": "elasticsearch:9300",
