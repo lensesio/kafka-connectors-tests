@@ -37,11 +37,14 @@
             "tasks.max": "1",
             "topics": "person_redis",
             "connect.redis.connection.host": "redis",
+            "connect.redis.host": "redis",
             "connect.redis.connection.port": "6379",
+            "connect.redis.port": "6379",
             "connect.redis.connection.password": "pass",
+            "connect.redis.password": "pass",
             "connect.redis.sink.kcql": "SELECT firstName, lastName, salary from person_redis PK lastName",
             "connect.redis.kcql": "SELECT firstName, lastName, salary from person_redis PK lastName",
-            "connect.deprecated.fields.to.remove": "connect.redis.sink.kcql"
+            "connect.deprecated.fields.to.remove": "connect.redis.sink.kcql, connect.redis.connection.host, connect.redis.connection.port, connect.redis.connection.password"
           }
         }
     - command: sleep 30

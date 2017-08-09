@@ -43,9 +43,14 @@
             "tasks.max": "1",
             "topics": "voltdb-sink",
             "connect.volt.connection.servers": "voltdb:21212",
+            "connect.volt.servers": "voltdb:21212",
             "connect.volt.connection.user": "",
+            "connect.volt.username": "",
             "connect.volt.connection.password": "",
-            "connect.volt.sink.kcql": "INSERT INTO person SELECT * FROM voltdb-sink"
+            "connect.volt.password": "",
+            "connect.volt.sink.kcql": "INSERT INTO person SELECT * FROM voltdb-sink",
+            "connect.volt.kcql": "INSERT INTO person SELECT * FROM voltdb-sink",
+            "connect.deprecated.fields.to.remove": "connect.volt.sink.kcql, connect.volt.connection.servers, connect.volt.connection.user, connect.volt.connection.password"
           }
         }
     - command: sleep 30
