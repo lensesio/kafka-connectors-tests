@@ -37,8 +37,8 @@
             "connector.class": "com.datamountaineer.streamreactor.connect.coap.source.CoapSourceConnector",
             "tasks.max": "1",
             "topics": "coap",
-            "connect.coap.source.uri": "coap://coap.me:5683",
-            "connect.coap.kcql": "INSERT INTO coap SELECT * FROM test"
+            "connect.coap.uri": "coap://californium.eclipse.org:5683",
+            "connect.coap.kcql": "INSERT INTO coap SELECT * FROM obs"
           }
         }
     - command: sleep 30
@@ -50,17 +50,17 @@
     #   command: >
     #     docker exec kafkaconnectcoap_coap_1 /opt/go/bin/client
     #   timeout: 20s
-    - command: sleep 60
+    - command: sleep 30
       nolog: true
     - name: Read and Verify Entries from Topic
       command: >
-        timeout 45
+        timeout 30
         docker run --rm --network=kafkaconnectcoap_default landoop/fast-data-dev
           kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
                                       --topic coap --from-beginning --new-consumer
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
-      stdout_has: [ 'welcome to the ETSI plugtest' ]
+      stdout_has: [ 'idvm-infk-mattern', 'obs' ]
     - name: Read First 4000 Lines of Connect Logs
       command: >
         docker exec kafkaconnectcoap_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
