@@ -4,10 +4,10 @@ MAINTAINER Marios Andreopoulos <marios@landoop.com>
 WORKDIR /
 
 RUN yum install -y epel-release wget \
-    && wget https://archive.cloudera.com/beta/kudu/redhat/7/x86_64/kudu/cloudera-kudu.repo \
+    && wget https://archive.cloudera.com/kudu/redhat/7/x86_64/kudu/cloudera-kudu.repo \
          -O /etc/yum.repos.d/cloudera-kudu.repo \
     && rpm --import \
-           https://archive.cloudera.com/beta/kudu/redhat/7/x86_64/kudu/RPM-GPG-KEY-cloudera \
+           https://archive.cloudera.com/kudu/redhat/7/x86_64/kudu/RPM-GPG-KEY-cloudera \
     && yum install -y \
                    supervisor \
                    kudu \
