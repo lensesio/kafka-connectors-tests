@@ -47,11 +47,14 @@
             "tasks.max": "1",
             "topics": "rethink-sink",
             "connect.rethink.sink.db": "landoop",
+            "connect.rethink.db": "landoop",
             "connect.rethink.sink.host": "rethinkdb",
+            "connect.rethink.host": "rethinkdb",
             "connect.rethink.sink.port": "28015",
+            "connect.rethink.port": "28015",
             "connect.rethink.sink.kcql": "INSERT INTO connect_test SELECT * FROM rethink-sink",
             "connect.rethink.kcql": "INSERT INTO connect_test SELECT * FROM rethink-sink",
-            "connect.deprecated.fields.to.remove": "connect.rethink.sink.kcql"
+            "connect.deprecated.fields.to.remove": "connect.rethink.sink.kcql, connect.rethink.sink.db, connect.rethink.sink.host, connect.rethink.sink.port"
            }
         }
     - name: Create a RethinkDB Distributed Source Connector
@@ -68,11 +71,14 @@
             "connector.class": "com.datamountaineer.streamreactor.connect.rethink.source.ReThinkSourceConnector",
             "tasks.max": "1",
             "connect.rethink.source.db": "landoop",
+            "connect.rethink.db": "landoop",
             "connect.rethink.source.host": "rethinkdb",
+            "connect.rethink.host": "rethinkdb",
             "connect.rethink.source.port": "28015",
+            "connect.rethink.port": "28015",
             "connect.rethink.source.kcql": "INSERT INTO rethink-source SELECT * FROM connect_test",
             "connect.rethink.kcql": "INSERT INTO rethink-source SELECT * FROM connect_test",
-            "connect.deprecated.fields.to.remove": "connect.rethink.source.kcql"
+            "connect.deprecated.fields.to.remove": "connect.rethink.source.kcql, connect.rethink.source.db, connect.rethink.source.host, connect.rethink.source.port"
            }
         }
     - command: sleep 30
