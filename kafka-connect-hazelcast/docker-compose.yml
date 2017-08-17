@@ -10,15 +10,15 @@ services:
       - RUNTESTS=0
     # ports:
     #   - 3030:3030
-  hazelcast-client:
-    build:
-      context: ./hazelcast-client
-      args:
-        - HAZELCAST_CLIENT_URL=https://github.com/Landoop/hazelcast-client/releases/download/0.4/hazelcast-client.jar
-    image: landoop/hazelcast-client
-    depends_on:
-      - hazelcast
-    command: ["-host", "hazelcast:5701", "-user", "dev", "-pass", "dev-pass", "-query", "sink-index"]
+  # hazelcast-client:
+  #   build:
+  #     context: ./hazelcast-client
+  #     args:
+  #       - HAZELCAST_CLIENT_URL=https://github.com/Landoop/hazelcast-client/releases/download/0.4/hazelcast-client.jar
+  #   image: landoop/hazelcast-client
+  #   depends_on:
+  #     - hazelcast
+  #   command: ["-host", "hazelcast:5701", "-user", "dev", "-pass", "dev-pass", "-query", "sink-index"]
   hazelcast:
     image: hazelcast/hazelcast:3.8.4
     # environment:
