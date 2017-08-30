@@ -64,7 +64,7 @@
   entries:
     - name: Read Entries from Topic
       command: >
-        timeout 30
+        timeout 40
         docker exec kafkaconnectmqtt_fast-data-dev_1
           kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
                                       --topic mqtt-source --from-beginning --new-consumer
@@ -77,9 +77,9 @@
       command: >
         docker exec kafkaconnectmqtt_fast-data-dev_1 cat /var/log/activemq-test.log
       stdout_has: [ 'plant1-room3-pod4', 'ship5-deck2-rack3' ]
-    - name: Read First 6000 Lines of Connect Logs
+    - name: Read First 7000 Lines of Connect Logs
       command: >
-        docker exec kafkaconnectmqtt_fast-data-dev_1 head -n6000 /var/log/connect-distributed.log
+        docker exec kafkaconnectmqtt_fast-data-dev_1 head -n7000 /var/log/connect-distributed.log
       stdout_not_has: [ '\] ERROR' ]
 
 - name: Clean-up Containers
