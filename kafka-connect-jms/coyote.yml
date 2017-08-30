@@ -46,7 +46,7 @@
             "connect.jms.uri": "tcp://activemq:61616",
             "connect.jms.connection.factory": "ConnectionFactory",
             "connect.jms.initial.context.factory": "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-            "connect.jms.kcql": "INSERT INTO connect_topic SELECT * FROM jms-sink WITHTYPE=TOPIC",
+            "connect.jms.kcql": "INSERT INTO connect_topic SELECT * FROM jms-sink WITHTYPE TOPIC",
             "connect.jms.topics": "connect_topic",
             "connect.deprecated.fields.to.remove": "connect.jms.url"
           }
@@ -99,7 +99,7 @@
             "connect.jms.url": "tcp://activemq:61616",
             "connect.jms.connection.factory": "ConnectionFactory",
             "connect.jms.initial.context.factory": "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-            "connect.jms.kcql": "INSERT INTO jms-source SELECT * FROM connect_topic WITHTYPE=TOPIC",
+            "connect.jms.kcql": "INSERT INTO jms-source SELECT * FROM connect_topic WITHTYPE TOPIC",
             "connect.jms.topics": "connect_topic"
           }
         }
