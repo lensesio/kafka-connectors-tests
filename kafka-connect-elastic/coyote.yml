@@ -23,7 +23,7 @@
     - name: Create Topic
       command: >
         docker run --rm --network=kafkaconnectelastic_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic elastic-sink --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic elastic-sink --partitions 1 --replication-factor 1 --create
     - name: Create an ElasticSearch Distributed Connector
       command: >
         docker run --rm --network=kafkaconnectelastic_default -i landoop/fast-data-dev

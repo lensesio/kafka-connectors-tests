@@ -21,11 +21,11 @@
     - name: Create FX Topic
       command: >
         docker run --rm --network=kafkaconnectyahoo_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic yahoo-fx-source --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic yahoo-fx-source --partitions 1 --replication-factor 1 --create
     - name: Create Stocks Topic
       command: >
         docker run --rm --network=kafkaconnectyahoo_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic yahoo-stocks-source --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic yahoo-stocks-source --partitions 1 --replication-factor 1 --create
     - name: Create a Yahoo Finance Distributed Connector
       command: >
         docker run --rm --network=kafkaconnectyahoo_default -i landoop/fast-data-dev

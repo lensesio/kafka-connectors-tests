@@ -23,11 +23,11 @@
     - name: Create Sink Topic
       command: >
         docker run --rm --network=kafkaconnectrethink_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic rethink-sink --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic rethink-sink --partitions 1 --replication-factor 1 --create
     - name: Create Source Topic
       command: >
         docker run --rm --network=kafkaconnectrethink_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic rethink-source --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic rethink-source --partitions 1 --replication-factor 1 --create
     - name: Create RethinkDB Test Database and Table
       command: >
         docker run --rm --network=kafkaconnectrethink_default landoop/fast-data-dev-rethinkdb-client

@@ -23,7 +23,7 @@
     - name: Create Kafka Topic
       command: >
         docker run --rm --network=kafkaconnectjms_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic jms-sink --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic jms-sink --partitions 1 --replication-factor 1 --create
     - name: Setup a Listener for ActiveMQ Topic
       command: >
         docker exec -d kafkaconnectjms_fast-data-dev_1
@@ -79,7 +79,7 @@
     - name: Create Kafka Topic
       command: >
         docker run --rm --network=kafkaconnectjms_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic jms-source --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic jms-source --partitions 1 --replication-factor 1 --create
     - name: Kill sink test listener so our connector can attacht to the topic
       command: >
         docker exec -d kafkaconnectjms_fast-data-dev_1 killall activemq-test

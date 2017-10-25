@@ -274,7 +274,7 @@
 #     - name: Create Source Topic
 #       command: >
 #         docker run --rm --network=fastdatademo_default landoop/fast-data-dev
-#           kafka-topics --zookeeper fast-data-dev:2181 --topic cassandra-stocks-roundtrip --partition 1 --replication 1 --create
+#           kafka-topics --zookeeper fast-data-dev:2181 --topic cassandra-stocks-roundtrip --partitions 1 --replication-factor 1 --create
 #     - name: Create a Cassandra Source Distributed Connector
 #       command: >
 #         docker run --rm --network=fastdatademo_default -i landoop/fast-data-dev
@@ -326,7 +326,7 @@
     # - name: Create Source Topic
     #   command: >
     #     docker run --rm --network=fastdatademo_default landoop/fast-data-dev
-    #       kafka-topics --zookeeper fast-data-dev:2181 --topic rethink-stocks-roundtrip --partition 1 --replication 1 --create
+    #       kafka-topics --zookeeper fast-data-dev:2181 --topic rethink-stocks-roundtrip --partitions 1 --replication-factor 1 --create
     - name: Create a RethinkDB Distributed Source Connector
       command: >
         docker run --rm --network=fastdatademo_default -i landoop/fast-data-dev

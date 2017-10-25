@@ -21,7 +21,7 @@
     - name: Create Topic
       command: >
         docker run --rm --network=kafkaconnectvoltdb_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic voltdb-sink --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic voltdb-sink --partitions 1 --replication-factor 1 --create
     - name: Create VoltDB Table
       command: >
         docker exec -i kafkaconnectvoltdb_voltdb_1

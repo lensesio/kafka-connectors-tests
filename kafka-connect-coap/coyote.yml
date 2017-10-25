@@ -21,7 +21,7 @@
     - name: Create Topic
       command: >
         docker run --rm --network=kafkaconnectcoap_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic coap --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic coap --partitions 1 --replication-factor 1 --create
     - name: Create a Coap Distributed Connector
       # alternative: http://coap.me/
       command: >

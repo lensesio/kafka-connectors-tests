@@ -23,7 +23,7 @@
     - name: Create Topic
       command: >
         docker run --rm --network=kafkaconnectinfluxdb_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic influxdb-sink --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic influxdb-sink --partitions 1 --replication-factor 1 --create
     - name: Create InfluxDB Admin User
       command: >
         docker exec -i kafkaconnectinfluxdb_influxdb_1

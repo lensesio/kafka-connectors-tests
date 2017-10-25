@@ -23,7 +23,7 @@
     - name: Create Kafka Topic
       command: >
         docker run --rm --network=kafkaconnectmqtt_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic mqtt-source --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic mqtt-source --partitions 1 --replication-factor 1 --create
     - name: Setup a Listener for ActiveMQ Topic
       command: >
         docker exec -d kafkaconnectmqtt_fast-data-dev_1

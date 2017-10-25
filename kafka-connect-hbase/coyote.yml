@@ -33,7 +33,7 @@
     - name: Create Kafka Topic
       command: >
         docker run --rm --network=kafkaconnecthbase_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic hbase-sink --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic hbase-sink --partitions 1 --replication-factor 1 --create
     - name: Create a Hbase Distributed Connector
       command: >
         docker run --rm --network=kafkaconnecthbase_default -i landoop/fast-data-dev

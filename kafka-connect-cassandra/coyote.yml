@@ -23,7 +23,7 @@
     - name: Create Source Topic
       command: >
         docker run --rm --network=kafkaconnectcassandra_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic cassandra-source --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic cassandra-source --partitions 1 --replication-factor 1 --create
     - name: Create Cassandra Source Table and Data
       command: >
         docker run --rm --network=kafkaconnectcassandra_default -i landoop/cassandra
@@ -69,7 +69,7 @@
     - name: Create Sink Topic
       command: >
         docker run --rm --network=kafkaconnectcassandra_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic cassandra-sink --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic cassandra-sink --partitions 1 --replication-factor 1 --create
     - name: Create Cassandra Sink Table
       command: >
         docker run --rm --network=kafkaconnectcassandra_default -i landoop/cassandra
