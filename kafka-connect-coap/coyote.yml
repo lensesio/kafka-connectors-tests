@@ -60,7 +60,7 @@
                                       --topic coap --from-beginning --new-consumer
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
-      stdout_has: [ 'idvm-infk-mattern', 'obs' ]
+      stdout_has: [ 'is_acknowledged', 'ingest_time' ]
     - name: Read First 4000 Lines of Connect Logs
       command: >
         docker exec kafkaconnectcoap_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
