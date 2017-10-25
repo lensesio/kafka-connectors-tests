@@ -4,7 +4,7 @@ services:
     build:
       context: ./fast-data-dev-with-deps
       args:
-        ACTIVEMQ_VERSION: 5.14.4
+        ACTIVEMQ_VERSION: 5.14.5
     image: landoop-fast-data-demo/fast-data-dev-with-deps:latest
     depends_on:
       - elasticsearch
@@ -33,7 +33,7 @@ services:
     build:
       context: ../kafka-connect-jms/activemq
       args:
-        ACTIVEMQ_VERSION: 5.14.4
+        ACTIVEMQ_VERSION: 5.14.5
         ACTIVEMQ_ADMIN: "landoop: landoop, admin"
         ACTIVEMQ_USER: "test: test, user"
     image: landoop-fast-data-demo/activemq

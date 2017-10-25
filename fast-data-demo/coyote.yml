@@ -26,11 +26,11 @@
     - name: Create FX Topic
       command: >
         docker run --rm --network=fastdatademo_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic yahoo-fx --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic yahoo-fx --partitions 1 --replication-factor 1 --create
     - name: Create Stocks Topic
       command: >
         docker run --rm --network=fastdatademo_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic yahoo-stocks --partition 1 --replication 1 --create
+          kafka-topics --zookeeper fast-data-dev:2181 --topic yahoo-stocks --partitions 1 --replication-factor 1 --create
     - name: Create a Yahoo Finance Distributed Connector
       command: >
         docker run --rm --network=fastdatademo_default -i landoop/fast-data-dev
@@ -95,10 +95,10 @@
             "connector.class": "com.datamountaineer.streamreactor.connect.hazelcast.sink.HazelCastSinkConnector",
             "tasks.max": "1",
             "topics": "yahoo-fx",
-            "connect.hazelcast.sink.cluster.members": "hazelcast",
-            "connect.hazelcast.sink.kcql": "INSERT INTO yahoo-fx SELECT * FROM yahoo-fx WITHFORMAT JSON",
-            "connect.hazelcast.sink.group.name": "dev",
-            "connect.hazelcast.sink.group.password": "dev-pass"
+            "connect.hazelcast.cluster.members": "hazelcast",
+            "connect.hazelcast.kcql": "INSERT INTO yahoo-fx SELECT * FROM yahoo-fx WITHFORMAT JSON",
+            "connect.hazelcast.group.name": "dev",
+            "connect.hazelcast.group.password": "dev-pass"
           }
         }
     - command: sleep 20
@@ -120,10 +120,10 @@
             "connector.class": "com.datamountaineer.streamreactor.connect.redis.sink.RedisSinkConnector",
             "tasks.max": "1",
             "topics": "yahoo-stocks",
-            "connect.redis.connection.host": "redis",
-            "connect.redis.connection.port": "6379",
-            "connect.redis.connection.password": "pass",
-            "connect.redis.sink.kcql": "SELECT name, currency, stock_exchange, symbol, price from yahoo-stocks PK symbol"
+            "connect.redis.host": "redis",
+            "connect.redis.port": "6379",
+            "connect.redis.password": "pass",
+            "connect.redis.kcql": "SELECT name, currency, stock_exchange, symbol, price from yahoo-stocks PK symbol"
           }
         }
     - command: sleep 30
@@ -163,12 +163,12 @@
             "connector.class": "com.datamountaineer.streamreactor.connect.influx.InfluxSinkConnector",
             "tasks.max": "1",
             "topics": "yahoo-stocks",
-            "connect.influx.connection.url": "http://influxdb:8086",
-            "connect.influx.connection.user": "landoop",
-            "connect.influx.connection.password": "landoop",
-            "connect.influx.connection.database": "landoop",
+            "connect.influx.url": "http://influxdb:8086",
+            "connect.influx.username": "landoop",
+            "connect.influx.password": "landoop",
+            "connect.influx.db": "landoop",
             "connect.influx.retention.policy": "default",
-            "connect.influx.sink.kcql": "INSERT INTO stocks-trade SELECT last_trade_size, last_trade_time FROM yahoo-stocks WITHTIMESTAMP last_trade_time"
+            "connect.influx.kcql": "INSERT INTO stocks-trade SELECT last_trade_size, last_trade_time FROM yahoo-stocks WITHTIMESTAMP last_trade_time"
           }
         }
     - command: sleep 30
@@ -197,7 +197,7 @@
             "connect.jms.url": "tcp://activemq:61616",
             "connect.jms.connection.factory": "ConnectionFactory",
             "connect.jms.initial.context.factory": "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-            "connect.jms.kcql": "INSERT INTO yahoo_fx SELECT * FROM yahoo-fx",
+            "connect.jms.kcql": "INSERT INTO yahoo_fx SELECT * FROM yahoo-fx WITHTYPE TOPIC",
             "connect.jms.topics": "yahoo_fx"
           }
         }
@@ -227,7 +227,7 @@
             "tasks.max": "1",
             "topics": "yahoo-stocks",
             "connect.kudu.master": "kudu",
-            "connect.kudu.sink.kcql": "INSERT INTO connect_test SELECT last_trade_size as id, symbol as random_field FROM yahoo-stocks"
+            "connect.kudu.kcql": "INSERT INTO connect_test SELECT last_trade_size as id, symbol as random_field FROM yahoo-stocks"
           }
         }
     - command: sleep 30
@@ -317,10 +317,10 @@
             "connector.class": "com.datamountaineer.streamreactor.connect.rethink.sink.ReThinkSinkConnector",
             "tasks.max": "1",
             "topics": "yahoo-fx",
-            "connect.rethink.sink.db": "landoop",
-            "connect.rethink.sink.host": "rethinkdb",
-            "connect.rethink.sink.port": "28015",
-            "connect.rethink.sink.kcql": "INSERT INTO yahoo_fx SELECT * FROM yahoo-fx"
+            "connect.rethink.db": "landoop",
+            "connect.rethink.host": "rethinkdb",
+            "connect.rethink.port": "28015",
+            "connect.rethink.kcql": "INSERT INTO yahoo_fx SELECT * FROM yahoo-fx"
            }
         }
     # - name: Create Source Topic
@@ -340,10 +340,10 @@
           "config": {
             "connector.class": "com.datamountaineer.streamreactor.connect.rethink.source.ReThinkSourceConnector",
             "tasks.max": "1",
-            "connect.rethink.source.db": "landoop",
-            "connect.rethink.source.host": "rethinkdb",
-            "connect.rethink.source.port": "28015",
-            "connect.rethink.source.kcql": "INSERT INTO rethink-fx-roundtrip SELECT * FROM yahoo_fx"
+            "connect.rethink.db": "landoop",
+            "connect.rethink.host": "rethinkdb",
+            "connect.rethink.port": "28015",
+            "connect.rethink.kcql": "INSERT INTO rethink-fx-roundtrip SELECT * FROM yahoo_fx"
            }
         }
     - command: sleep 30
@@ -365,10 +365,10 @@
             "connector.class": "com.datamountaineer.streamreactor.connect.mongodb.sink.MongoSinkConnector",
             "tasks.max": "1",
             "topics": "yahoo-stocks",
-            "connect.mongo.database": "landoop",
+            "connect.mongo.db": "landoop",
             "connect.mongo.connection": "mongodb://mongo:27017/landoop",
-            "connect.mongo.sink.batch.size": "10",
-            "connect.mongo.sink.kcql": "INSERT INTO stocks SELECT * FROM yahoo-stocks"
+            "connect.mongo.batch.size": "10",
+            "connect.mongo.kcql": "INSERT INTO stocks SELECT * FROM yahoo-stocks"
           }
         }
     - command: sleep 30
