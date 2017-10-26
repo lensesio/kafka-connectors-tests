@@ -10,3 +10,8 @@ RUN wget "http://apache.mirrors.ovh.net/ftp.apache.org/dist/activemq/${ACTIVEMQ_
 
 RUN rm -rf /extra-connect-jars/* \
     && ln -s /opt/activemq/activemq-all-${ACTIVEMQ_VERSION}.jar /extra-connect-jars/activemq-all-${ACTIVEMQ_VERSION}.jar
+
+RUN echo "retry.backoff.ms=500" >> /opt/confluent/etc/schema-registry/connect-avro-distributed.properties \
+    && echo "task.shutdown.graceful.timeout.ms=15000" >> /opt/confluent/etc/schema-registry/connect-avro-distributed.properties \
+    && echo "session.timeout.ms=60000" >> /opt/confluent/etc/schema-registry/connect-avro-distributed.properties \
+    && echo "rebalance.timeout.ms=90000" >> /opt/confluent/etc/schema-registry/connect-avro-distributed.properties

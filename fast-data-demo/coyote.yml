@@ -349,27 +349,27 @@
     - command: sleep 30
       nolog: true
 
-- name: Setup Mongo DB Connector
-  entries:
-    - name: Create a Mongo DB Distributed Connector
-      command: >
-        docker run --rm --network=fastdatademo_default -i landoop/fast-data-dev
-          curl -vs --stderr - -X POST -H "Content-Type: application/json"
-               --data @-
-               "http://fast-data-dev:8083/connectors"
-      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
-      stdin: |
-        {
-          "name": "mongo-sink",
-          "config": {
-            "connector.class": "com.datamountaineer.streamreactor.connect.mongodb.sink.MongoSinkConnector",
-            "tasks.max": "1",
-            "topics": "yahoo-stocks",
-            "connect.mongo.db": "landoop",
-            "connect.mongo.connection": "mongodb://mongo:27017/landoop",
-            "connect.mongo.batch.size": "10",
-            "connect.mongo.kcql": "INSERT INTO stocks SELECT * FROM yahoo-stocks"
-          }
-        }
-    - command: sleep 30
-      nolog: true
+# - name: Setup Mongo DB Connector
+#   entries:
+#     - name: Create a Mongo DB Distributed Connector
+#       command: >
+#         docker run --rm --network=fastdatademo_default -i landoop/fast-data-dev
+#           curl -vs --stderr - -X POST -H "Content-Type: application/json"
+#                --data @-
+#                "http://fast-data-dev:8083/connectors"
+#       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+#       stdin: |
+#         {
+#           "name": "mongo-sink",
+#           "config": {
+#             "connector.class": "com.datamountaineer.streamreactor.connect.mongodb.sink.MongoSinkConnector",
+#             "tasks.max": "1",
+#             "topics": "yahoo-stocks",
+#             "connect.mongo.db": "landoop",
+#             "connect.mongo.connection": "mongodb://mongo:27017/landoop",
+#             "connect.mongo.batch.size": "10",
+#             "connect.mongo.kcql": "INSERT INTO stocks SELECT * FROM yahoo-stocks"
+#           }
+#         }
+#     - command: sleep 30
+#       nolog: true

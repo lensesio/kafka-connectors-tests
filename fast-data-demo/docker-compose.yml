@@ -12,6 +12,7 @@ services:
       - ADV_HOST=fast-data-dev
       - FORWARDLOGS=0
       - RUNTESTS=0
+      - CONNECT_HEAP=4G
     ports:
       - 16781:8081
       - 16782:8082
@@ -47,5 +48,5 @@ services:
     command: redis-server /usr/local/etc/redis/redis.conf
   rethinkdb:
     image: rethinkdb
-  mongo:
-    image: mongo
+  # mongo:
+  #   image: mongo
