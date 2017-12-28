@@ -13,7 +13,7 @@ import (
 	"time"
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"github.com/linkedin/goavro"
+	goavro "gopkg.in/linkedin/goavro.v1"
 )
 
 var (

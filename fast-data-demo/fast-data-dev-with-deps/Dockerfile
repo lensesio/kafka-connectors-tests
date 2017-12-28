@@ -15,3 +15,4 @@ RUN echo "retry.backoff.ms=500" >> /opt/confluent/etc/schema-registry/connect-av
     && echo "task.shutdown.graceful.timeout.ms=15000" >> /opt/confluent/etc/schema-registry/connect-avro-distributed.properties \
     && echo "session.timeout.ms=60000" >> /opt/confluent/etc/schema-registry/connect-avro-distributed.properties \
     && echo "rebalance.timeout.ms=90000" >> /opt/confluent/etc/schema-registry/connect-avro-distributed.properties
+#    && sed -e 's/INFO/DEBUG/' -i /opt/confluent/etc/schema-registry/log4j.properties /opt/confluent/etc/kafka/connect-log4j.properties
