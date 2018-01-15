@@ -17,4 +17,4 @@ RUN wget "http://apache.mirrors.ovh.net/ftp.apache.org/dist/activemq/${ACTIVEMQ_
     && rm -rf /activemq.tgz
 
 RUN rm -rf /extra-connect-jars/* \
-    && ln -s /opt/activemq/activemq-all-${ACTIVEMQ_VERSION}.jar /extra-connect-jars/activemq-all-${ACTIVEMQ_VERSION}.jar
+    && ln -s /opt/activemq/activemq-all-${ACTIVEMQ_VERSION}.jar /opt/connectors/kafka-connect-jms/activemq-all-${ACTIVEMQ_VERSION}.jar
