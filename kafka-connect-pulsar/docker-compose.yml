@@ -1,0 +1,16 @@
+version: '2'
+services:
+  fast-data-dev:
+    image: landoop/fast-data-dev:latest
+    depends_on:
+      - pulsar
+    environment:
+      - ADV_HOST=fast-data-dev
+      - FORWARDLOGS=0
+      - RUNTESTS=0
+      - DISABLE=elastic5,elastic,elasticsearch,druid,ftp,voltdb,bloomberg,redis,cassandra,mongodb,mqtt,jms,activemq,kudu,hbase,hdfs,hazelcast,blockchain,rethinkdb,jdbc,coap,s3,influxdb
+    # ports:
+    #   - 3030:3030
+  pulsar:
+    image: streamlio/pulsar
+    command: bin/pulsar standalone --advertised-address pulsar
