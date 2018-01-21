@@ -10,48 +10,48 @@
       command: docker-compose pull
       ignore_exit_code: true
     - name: Docker Compose Build
-      command: docker-compose build
+      command: docker-compose build --pull
     - name: Docker Compose Up
       command: docker-compose up -d
     - name: Sleep a bit
-      command: sleep 180
+      command: sleep 220
       nolog: true
     - name: Check docker compose log
       command: docker-compose logs
       stdout_has: [ 'INFO success: broker entered RUNNING state' ]
       stdout_not_has: [ 'INFO exited: broker' ]
 
-- name: Setup Yahoo Connector
-  entries:
-    - name: Create FX Topic
-      command: >
-        docker run --rm --network=fastdatademo_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic yahoo-fx --partitions 1 --replication-factor 1 --create
-    - name: Create Stocks Topic
-      command: >
-        docker run --rm --network=fastdatademo_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic yahoo-stocks --partitions 1 --replication-factor 1 --create
-    - name: Create a Yahoo Finance Distributed Connector
-      command: >
-        docker run --rm --network=fastdatademo_default -i landoop/fast-data-dev
-          curl -vs --stderr - -X POST -H "Content-Type: application/json"
-               --data @-
-               "http://fast-data-dev:8083/connectors"
-      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
-      stdin: |
-        {
-          "name": "yahoo-finance-source",
-          "config": {
-            "connector.class": "com.datamountaineer.streamreactor.connect.yahoo.source.YahooSourceConnector",
-            "tasks.max": "1",
-            "connect.yahoo.source.fx.topic": "yahoo-fx",
-            "connect.yahoo.source.fx.subscriptions": "USDGBP=X,USDGBP=X,EURGBP=X",
-            "connect.yahoo.source.stocks.topic": "yahoo-stocks",
-            "connect.yahoo.source.stocks.subscriptions": "GOOGL,MSFT,AAPL",
-            "connect.yahoo.source.error.policy": "THROW",
-            "connect.yahoo.source.poll.interval": "10000"
-          }
-        }
+# - name: Setup Yahoo Connector
+#   entries:
+#     - name: Create FX Topic
+#       command: >
+#         docker run --rm --network=fastdatademo_default landoop/fast-data-dev
+#           kafka-topics --zookeeper fast-data-dev:2181 --topic yahoo-fx --partitions 1 --replication-factor 1 --create
+#     - name: Create Stocks Topic
+#       command: >
+#         docker run --rm --network=fastdatademo_default landoop/fast-data-dev
+#           kafka-topics --zookeeper fast-data-dev:2181 --topic yahoo-stocks --partitions 1 --replication-factor 1 --create
+#     - name: Create a Yahoo Finance Distributed Connector
+#       command: >
+#         docker run --rm --network=fastdatademo_default -i landoop/fast-data-dev
+#           curl -vs --stderr - -X POST -H "Content-Type: application/json"
+#                --data @-
+#                "http://fast-data-dev:8083/connectors"
+#       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+#       stdin: |
+#         {
+#           "name": "yahoo-finance-source",
+#           "config": {
+#             "connector.class": "com.datamountaineer.streamreactor.connect.yahoo.source.YahooSourceConnector",
+#             "tasks.max": "1",
+#             "connect.yahoo.source.fx.topic": "yahoo-fx",
+#             "connect.yahoo.source.fx.subscriptions": "USDGBP=X,USDGBP=X,EURGBP=X",
+#             "connect.yahoo.source.stocks.topic": "yahoo-stocks",
+#             "connect.yahoo.source.stocks.subscriptions": "GOOGL,MSFT,AAPL",
+#             "connect.yahoo.source.error.policy": "THROW",
+#             "connect.yahoo.source.poll.interval": "10000"
+#           }
+#         }
 
 ## Disabled because it is incompatible with ActiveMQ. To enable it, disable jms connector
 ## and isntead of the custom fast-data-dev-with-deps image, use landoop/fast-data-dev.
@@ -94,9 +94,9 @@
           "config": {
             "connector.class": "com.datamountaineer.streamreactor.connect.hazelcast.sink.HazelCastSinkConnector",
             "tasks.max": "1",
-            "topics": "yahoo-fx",
+            "topics": "nyc_yellow_taxi_trip_data",
             "connect.hazelcast.cluster.members": "hazelcast",
-            "connect.hazelcast.kcql": "INSERT INTO yahoo-fx SELECT * FROM yahoo-fx WITHFORMAT JSON",
+            "connect.hazelcast.kcql": "INSERT INTO nyc_taxi_stats SELECT passenger_count, trip_distance, tip_amount FROM nyc_yellow_taxi_trip_data WITHFORMAT JSON",
             "connect.hazelcast.group.name": "dev",
             "connect.hazelcast.group.password": "dev-pass"
           }
@@ -119,11 +119,11 @@
           "config": {
             "connector.class": "com.datamountaineer.streamreactor.connect.redis.sink.RedisSinkConnector",
             "tasks.max": "1",
-            "topics": "yahoo-stocks",
+            "topics": "reddit_posts",
             "connect.redis.host": "redis",
             "connect.redis.port": "6379",
             "connect.redis.password": "pass",
-            "connect.redis.kcql": "SELECT name, currency, stock_exchange, symbol, price from yahoo-stocks PK symbol"
+            "connect.redis.kcql": "SELECT created_utc AS timestamp, author, id, body AS message FROM reddit_posts PK id"
           }
         }
     - command: sleep 30
@@ -162,13 +162,17 @@
           "config": {
             "connector.class": "com.datamountaineer.streamreactor.connect.influx.InfluxSinkConnector",
             "tasks.max": "1",
-            "topics": "yahoo-stocks",
+            "topics": "backblaze_smart",
             "connect.influx.url": "http://influxdb:8086",
             "connect.influx.username": "landoop",
             "connect.influx.password": "landoop",
             "connect.influx.db": "landoop",
             "connect.influx.retention.policy": "default",
-            "connect.influx.kcql": "INSERT INTO stocks-trade SELECT last_trade_size, last_trade_time FROM yahoo-stocks WITHTIMESTAMP last_trade_time"
+            "connect.influx.kcql": "INSERT INTO hard-disk-temperature SELECT serial_number, smart_194_raw AS temperatureCelsius FROM backblaze_smart WITHTIMESTAMP sys_time()"
+            "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+            "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+            "key.converter.schemas.enable": false,
+            "value.converter.schemas.enable": false
           }
         }
     - command: sleep 30
@@ -179,7 +183,7 @@
     - name: Setup a Listener for ActiveMQ Topic
       command: >
         docker exec -d fastdatademo_fast-data-dev_1
-          nohup activemq-test -server activemq:61613 -origin /topic/yahoo_fx -log /dev/null
+          nohup activemq-test -server activemq:61613 -origin /topic/ais_data -log /dev/null
     - name: Create a JMS Distributed Connector
       command: >
         docker run --rm --network=fastdatademo_default -i landoop/fast-data-dev
@@ -193,12 +197,12 @@
           "config": {
             "connector.class": "com.datamountaineer.streamreactor.connect.jms.sink.JMSSinkConnector",
             "tasks.max": "1",
-            "topics": "yahoo-fx",
+            "topics": "sea_vessel_position_reports",
             "connect.jms.url": "tcp://activemq:61616",
             "connect.jms.connection.factory": "ConnectionFactory",
             "connect.jms.initial.context.factory": "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-            "connect.jms.kcql": "INSERT INTO yahoo_fx SELECT * FROM yahoo-fx WITHTYPE TOPIC",
-            "connect.jms.topics": "yahoo_fx"
+            "connect.jms.kcql": "INSERT INTO ais_data SELECT * FROM sea_vessel_position_reports WITHTYPE TOPIC",
+            "connect.jms.topics": "sea_vessel_position_reports"
           }
         }
     - command: sleep 30
@@ -225,9 +229,9 @@
           "config": {
             "connector.class": "com.datamountaineer.streamreactor.connect.kudu.sink.KuduSinkConnector",
             "tasks.max": "1",
-            "topics": "yahoo-stocks",
+            "topics": "reddit_posts",
             "connect.kudu.master": "kudu",
-            "connect.kudu.kcql": "INSERT INTO connect_test SELECT last_trade_size as id, symbol as random_field FROM yahoo-stocks"
+            "connect.kudu.kcql": "INSERT INTO connect_test SELECT id, body AS random_field FROM reddit_posts"
           }
         }
     - command: sleep 30
@@ -302,7 +306,7 @@
     - name: Create RethinkDB Test Database and Table
       command: >
         docker run --rm --network=fastdatademo_default landoop/fast-data-dev-rethinkdb-client
-          rethinkdb-test -server rethinkdb:28015 -database landoop -create-db -table yahoo_fx -create-table
+          rethinkdb-test -server rethinkdb:28015 -database landoop -create-db -table ais_data -create-table
     - name: Create a RethinkDB Distributed Sink Connector
       command: >
         docker run --rm --network=fastdatademo_default -i landoop/fast-data-dev
@@ -316,11 +320,11 @@
           "config": {
             "connector.class": "com.datamountaineer.streamreactor.connect.rethink.sink.ReThinkSinkConnector",
             "tasks.max": "1",
-            "topics": "yahoo-fx",
+            "topics": "sea_vessel_position_reports",
             "connect.rethink.db": "landoop",
             "connect.rethink.host": "rethinkdb",
             "connect.rethink.port": "28015",
-            "connect.rethink.kcql": "INSERT INTO yahoo_fx SELECT * FROM yahoo-fx"
+            "connect.rethink.kcql": "INSERT INTO ais_data SELECT * FROM sea_vessel_position_reports"
            }
         }
     # - name: Create Source Topic
@@ -343,7 +347,7 @@
             "connect.rethink.db": "landoop",
             "connect.rethink.host": "rethinkdb",
             "connect.rethink.port": "28015",
-            "connect.rethink.kcql": "INSERT INTO rethink-fx-roundtrip SELECT * FROM yahoo_fx"
+            "connect.rethink.kcql": "INSERT INTO sea_vessel_reports_roundtrip SELECT * FROM ais_data"
            }
         }
     - command: sleep 30

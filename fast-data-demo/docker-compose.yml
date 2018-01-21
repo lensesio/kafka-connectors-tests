@@ -13,6 +13,7 @@ services:
       - FORWARDLOGS=0
       - RUNTESTS=0
       - CONNECT_HEAP=4G
+      - RUNNING_SAMPLEDATA=1
     ports:
       - 16781:8081
       - 16782:8082
