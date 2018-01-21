@@ -168,7 +168,7 @@
             "connect.influx.password": "landoop",
             "connect.influx.db": "landoop",
             "connect.influx.retention.policy": "default",
-            "connect.influx.kcql": "INSERT INTO hard-disk-temperature SELECT serial_number, smart_194_raw AS temperatureCelsius FROM backblaze_smart WITHTIMESTAMP sys_time()"
+            "connect.influx.kcql": "INSERT INTO hard-disk-temperature SELECT serial_number, smart_194_raw AS temperatureCelsius FROM backblaze_smart WITHTIMESTAMP sys_time()",
             "key.converter": "org.apache.kafka.connect.json.JsonConverter",
             "value.converter": "org.apache.kafka.connect.json.JsonConverter",
             "key.converter.schemas.enable": false,
@@ -347,7 +347,8 @@
             "connect.rethink.db": "landoop",
             "connect.rethink.host": "rethinkdb",
             "connect.rethink.port": "28015",
-            "connect.rethink.kcql": "INSERT INTO sea_vessel_reports_roundtrip SELECT * FROM ais_data"
+            "connect.rethink.kcql": "INSERT INTO sea_vessel_reports_roundtrip SELECT * FROM ais_data",
+            "connect.kcql.topics": "sea_vessel_reports_roundtrip"
            }
         }
     - command: sleep 30
