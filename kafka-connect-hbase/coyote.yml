@@ -23,7 +23,7 @@
     - name: Start hbase
       command: docker exec -d kafkaconnecthbase_fast-data-dev_1 start-hbase.sh
     - name: Sleep a bit more
-      command: sleep 20
+      command: sleep 30
       nolog: true
 
 - name: Setup HBase Connector
