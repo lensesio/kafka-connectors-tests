@@ -8,8 +8,13 @@
       ignore_exit_code: true
     - name: Docker Compose Up
       command: docker-compose up -d
-    - name: Sleep a bit
-      command: sleep 221
+    - name: Wait for Connect to get up
+      command: >
+        bash -c '
+          for ((i=0;i<30;i++)); do
+            sleep 10;
+            docker exec kafkaconnectredis_fast-data-dev_1 curl "http://localhost:8083/connectors" && break;
+          done'
       nolog: true
     - name: Check docker compose log
       command: docker-compose logs

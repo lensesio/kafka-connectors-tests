@@ -6,5 +6,6 @@ services:
       - ADV_HOST=fast-data-dev
       - FORWARDLOGS=0
       - RUNTESTS=0
+      - CONNECTORS=yahoo
     # ports:
     #  - 3030:3030

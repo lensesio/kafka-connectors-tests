@@ -8,7 +8,7 @@ services:
       - ADV_HOST=fast-data-dev
       - FORWARDLOGS=0
       - RUNTESTS=0
-      - DISABLE=elastic5,elastic,elasticsearch,druid,ftp,voltdb,bloomberg,redis,cassandra,mongodb,mqtt,jms,activemq,kudu,hbase,hdfs,hazelcast,blockchain,rethinkdb,jdbc,coap,s3,influxdb
+      - CONNECTORS=pulsar
     # ports:
     #   - 3030:3030
   pulsar:
