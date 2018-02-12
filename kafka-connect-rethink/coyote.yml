@@ -18,6 +18,8 @@
             docker exec kafkaconnectrethink_fast-data-dev_1 curl "http://localhost:8083/connectors" && break;
           done'
       nolog: true
+    - command: sleep 30
+      nolog: true
     - name: Check docker compose log
       command: docker-compose logs
       stdout_has: [ 'INFO success: broker entered RUNNING state' ]
@@ -118,9 +120,9 @@
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       stdout_has: [ 'John', 'Smith', 'Anna', 'Jones', '4830' ]
-    - name: Read First 4000 Lines of Connect Logs
+    - name: Read First 8000 Lines of Connect Logs
       command: >
-        docker exec kafkaconnectrethink_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
+        docker exec kafkaconnectrethink_fast-data-dev_1 head -n8000 /var/log/connect-distributed.log
       stdout_has: [ '\] INFO .*Writ' ]
       stdout_not_has: [ '\] ERROR' ]
 

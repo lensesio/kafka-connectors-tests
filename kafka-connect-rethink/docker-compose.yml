@@ -14,4 +14,3 @@ services:
     #   - 3030:3030
   rethinkdb:
     image: rethinkdb
-
