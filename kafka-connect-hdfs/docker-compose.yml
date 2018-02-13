@@ -9,5 +9,5 @@ services:
       - RUNTESTS=0
       - CONNECTORS=hdfs,storage-common
       - RUN_AS_ROOT=1
-    ports:
-      - 3030:3030
+    # ports:
+    #   - 3030:3030
