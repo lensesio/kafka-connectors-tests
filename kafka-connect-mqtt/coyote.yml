@@ -48,36 +48,29 @@
             "tasks.max": "1",
             "connect.mqtt.connection.clean": "true",
             "connect.mqtt.connection.timeout": "1000",
-            "connect.mqtt.source.kcql": "INSERT INTO mqtt-source SELECT * FROM /topic/connect_topic",
             "connect.mqtt.kcql": "INSERT INTO mqtt-source SELECT * FROM /topic/connect_topic WITHCONVERTER=`com.datamountaineer.streamreactor.connect.converters.source.AvroConverter`",
             "connect.mqtt.connection.keep.alive": "1000",
-            "connect.mqtt.source.converters": "/topic/connect_topic=com.datamountaineer.streamreactor.connect.converters.source.AvroConverter",
             "connect.source.converter.avro.schemas": "/topic/connect_topic=/schema.avro",
-            "connect.converter.avro.schemas": "/topic/connect_topic=/schema.avro",
             "connect.mqtt.client.id": "dm_source_id,",
             "connect.mqtt.converter.throw.on.error": "true",
             "connect.mqtt.hosts": "tcp://activemq:1883",
-            "connect.mqtt.connections.host": "tcp://activemq:1883",
-            "connect.mqtt.service.quality": "1",
-            "connect.deprecated.fields.to.remove": "connect.mqtt.hosts, connect.mqtt.source.url, connect.mqtt.source.converters, connect.source.converter.avro.schemas"
+            "connect.mqtt.service.quality": "1"
           }
         }
-    - command: sleep 30
+    - command: sleep 15
       nolog: true
 
 - name: Test Connector
   entries:
     - name: Read Entries from Topic
       command: >
-        timeout 40
+        timeout 10
         docker exec kafkaconnectmqtt_fast-data-dev_1
           kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
                                       --topic mqtt-source --from-beginning --new-consumer
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       stdout_has: [ '{"output":5,"deviceid":"plant1-room3-pod4"}', '{"output":16,"deviceid":"ship5-deck2-rack3"}' ]
-    - command: sleep 30
-      nolog: true
     - name: Read activemq-test logs to verify messages were passed
       command: >
         docker exec kafkaconnectmqtt_fast-data-dev_1 cat /var/log/activemq-test.log
