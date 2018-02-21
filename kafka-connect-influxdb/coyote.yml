@@ -61,21 +61,15 @@
             "connector.class": "com.datamountaineer.streamreactor.connect.influx.InfluxSinkConnector",
             "tasks.max": "1",
             "topics": "influxdb-sink",
-            "connect.influx.connection.url": "http://influxdb:8086",
             "connect.influx.url": "http://influxdb:8086",
-            "connect.influx.connection.user": "landoop",
             "connect.influx.username": "landoop",
-            "connect.influx.connection.password": "landoop",
             "connect.influx.password": "landoop",
-            "connect.influx.connection.database": "landoop",
             "connect.influx.db": "landoop",
             "connect.influx.retention.policy": "default",
-            "connect.influx.sink.kcql": "INSERT INTO test SELECT * FROM influxdb-sink",
-            "connect.influx.kcql": "INSERT INTO test SELECT * FROM influxdb-sink",
-            "connect.deprecated.fields.to.remove": "connect.influx.connection.url, connect.influx.connection.user, connect.influx.connection.password, connect.influx.connection.database, connect.influx.sink.kcql"
+            "connect.influx.kcql": "INSERT INTO test SELECT * FROM influxdb-sink"
           }
         }
-    - command: sleep 30
+    - command: sleep 20
       nolog: true
 
 - name: Test Connector
