@@ -4,12 +4,12 @@
 - name: Setup Containers
   entries:
     - name: Docker Compose Pull
-      command: docker-compose pull
+      command: docker-compose -p kafkaconnectelastic5 pull
       ignore_exit_code: true
     - name: Docker Compose Build
-      command: docker-compose build
+      command: docker-compose -p kafkaconnectelastic5 build
     - name: Docker Compose Up
-      command: docker-compose up -d
+      command: docker-compose -p kafkaconnectelastic5 up -d
     - name: Wait for Connect to get up
       command: >
         bash -c '
@@ -19,7 +19,7 @@
           done'
       nolog: true
     - name: Check docker compose log
-      command: docker-compose logs
+      command: docker-compose -p kafkaconnectelastic5 logs
       stdout_has: [ 'INFO success: broker entered RUNNING state' ]
       stdout_not_has: [ 'INFO exited: broker', 'elasticsearch.*ERROR:' ]
 
@@ -90,4 +90,4 @@
 - name: Clean-up Containers
   entries:
     - name: Docker Compose Down
-      command: docker-compose down
+      command: docker-compose -p kafkaconnectelastic5 down
