@@ -1,7 +1,7 @@
 FROM landoop/fast-data-dev:latest
 MAINTAINER Marios Andreopoulos <marios@landoop.com>
 
-ARG HADOOP_VERSION="2.7.4"
+ARG HADOOP_VERSION="2.7.6"
 RUN wget https://www-us.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz \
         -O /hadoop.tgz \
     && mkdir /opt/hadoop \
