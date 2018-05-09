@@ -12,8 +12,8 @@ RUN apk add --no-cache \
     && echo "progress = dot:giga" | tee /etc/wgetrc \
     && mkdir -p /opt
 
-ARG HBASE_VERSION="1.3.1"
-RUN wget "https://www-eu.apache.org/dist/hbase/1.3.1/hbase-1.3.1-bin.tar.gz" \
+ARG HBASE_VERSION="1.4.4"
+RUN wget "https://www-eu.apache.org/dist/hbase/1.4.4/hbase-1.4.4-bin.tar.gz" \
     && tar xzf "/hbase-${HBASE_VERSION}-bin.tar.gz" --no-same-owner -C /opt/
 
 RUN rm -rf /extra-connect-jars/*
