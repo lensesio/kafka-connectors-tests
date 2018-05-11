@@ -1,4 +1,4 @@
-# kafka-connect-elastic5 test #
+# kafka-connect-elastic6 test #
 
 This is the test for Landoop's Elastic Search 5 connector (provided
 by the Stream Reactor repo). Landoop's connectors use the native
