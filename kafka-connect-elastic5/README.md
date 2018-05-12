@@ -1,7 +1,7 @@
 # kafka-connect-elastic5 test #
 
-This is the test for Datamountaineer's Elastic Search 5 connector (provided
-by the Stream Reactor repo). Datamountaineer's connectors use the native
+This is the test for Landoop's Elastic Search 5 connector (provided
+by the Stream Reactor repo). Landoop's connectors use the native
 Elastic Search protocol (port 9300), hence the need for two different versions.
 
 Most recent report: <http://coyote.landoop.com/connect/kafka-connect-elastic5/>
