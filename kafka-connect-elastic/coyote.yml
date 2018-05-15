@@ -4,12 +4,12 @@
 - name: Setup Containers
   entries:
     - name: Docker Compose Pull
-      command: docker-compose pull
+      command: docker-compose -p kafkaconnectelastic pull
       ignore_exit_code: true
     - name: Docker Compose Build
-      command: docker-compose build
+      command: docker-compose -p kafkaconnectelastic build
     - name: Docker Compose Up
-      command: docker-compose up -d
+      command: docker-compose -p kafkaconnectelastic up -d
     - name: Wait for Connect to get up
       command: >
         bash -c '
@@ -18,9 +18,11 @@
             docker exec kafkaconnectelastic_fast-data-dev_1 curl "http://localhost:8083/connectors" && break;
           done'
     - name: Check docker compose log
-      command: docker-compose logs
+      command: docker-compose -p kafkaconnectelastic logs
       stdout_has: [ 'INFO success: broker entered RUNNING state' ]
       stdout_not_has: [ 'INFO exited: broker', 'elasticsearch.*ERROR:' ]
+    - name: fast-data-dev build.info
+      command: docker exec kafkaconnectelastic_fast-data-dev_1 cat /build.info
 
 - name: Setup ElasticSearch Connector
   entries:
@@ -90,4 +92,4 @@
 - name: Clean-up Containers
   entries:
     - name: Docker Compose Down
-      command: docker-compose down
+      command: docker-compose -p kafkaconnectelastic down

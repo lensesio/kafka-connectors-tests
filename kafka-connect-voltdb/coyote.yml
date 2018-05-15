@@ -4,10 +4,10 @@
 - name: Setup Containers
   entries:
     - name: Docker Compose Pull
-      command: docker-compose pull
+      command: docker-compose -p kafkaconnectvoltdb pull
       ignore_exit_code: true
     - name: Docker Compose Up
-      command: docker-compose up -d
+      command: docker-compose -p kafkaconnectvoltdb up -d
     - name: Wait for Connect to get up
       command: >
         bash -c '
@@ -17,9 +17,11 @@
           done'
       nolog: true
     - name: Check docker compose log
-      command: docker-compose logs
+      command: docker-compose -p kafkaconnectvoltdb logs
       stdout_has: [ 'INFO success: broker entered RUNNING state' ]
       stdout_not_has: [ 'INFO exited: broker' ]
+    - name: fast-data-dev build.info
+      command: docker exec kafkaconnectvoltdb_fast-data-dev_1 cat /build.info
 
 - name: Setup VoltDB Connector
   entries:
@@ -91,4 +93,4 @@
 - name: Clean-up Containers
   entries:
     - name: Docker Compose Down
-      command: docker-compose down
+      command: docker-compose -p kafkaconnectvoltdb down

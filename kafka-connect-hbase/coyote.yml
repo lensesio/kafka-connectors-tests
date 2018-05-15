@@ -22,6 +22,8 @@
       stdout_not_has: [ 'INFO exited: broker' ]
     - name: Start hbase
       command: docker exec -d kafkaconnecthbase_fast-data-dev_1 start-hbase.sh
+    - name: fast-data-dev build.info
+      command: docker exec kafkaconnecthbase_fast-data-dev_1 cat /build.info
     - name: Sleep a bit more
       command: sleep 30
       nolog: true

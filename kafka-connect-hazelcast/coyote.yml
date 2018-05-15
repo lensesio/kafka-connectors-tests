@@ -4,14 +4,14 @@
 - name: Setup Containers
   entries:
     - name: Docker Compose Pull
-      command: docker-compose pull
+      command: docker-compose -p kafkaconnecthazelcast pull
       ignore_exit_code: true
     - name: Docker Compose Build
-      command: docker-compose build
+      command: docker-compose -p kafkaconnecthazelcast build
     - name: Docker Compose Up
-      command: docker-compose up -d
+      command: docker-compose -p kafkaconnecthazelcast up -d
     # - name: Stop Hazelcast-Client Container
-    #   command: docker-compose stop hazelcast-client
+    #   command: docker-compose -p kafkaconnecthazelcast stop hazelcast-client
     - name: Wait for Connect to get up
       command: >
         bash -c '
@@ -21,9 +21,11 @@
           done'
       nolog: true
     - name: Check docker compose log
-      command: docker-compose logs
+      command: docker-compose -p kafkaconnecthazelcast logs
       stdout_has: [ 'INFO success: broker entered RUNNING state' ]
       stdout_not_has: [ 'INFO exited: broker' ]
+    - name: fast-data-dev build.info
+      command: docker exec kafkaconnecthazelcast_fast-data-dev_1 cat /build.info
 
 - name: Setup Hazelcast Connector
   entries:
@@ -104,7 +106,7 @@
         {"firstName": "Anna", "lastName": "Doe", "age":32, "salary": 5430}
       timeout: 20s
     # - name: Start Hazelcast-Client Container
-    #   command: docker-compose start hazelcast-client
+    #   command: docker-compose -p kafkaconnecthazelcast start hazelcast-client
     - name: Write Entries into RingBuffer Topic
       command: >
         docker run --rm -i --network=kafkaconnecthazelcast_default landoop/fast-data-dev
@@ -135,4 +137,4 @@
 - name: Clean-up Containers
   entries:
     - name: Docker Compose Down
-      command: docker-compose down
+      command: docker-compose -p kafkaconnecthazelcast down

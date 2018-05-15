@@ -4,12 +4,12 @@
 - name: Setup Containers
   entries:
     - name: Docker Compose Pull
-      command: docker-compose pull
+      command: docker-compose -p kafkaconnectmongodb pull
       ignore_exit_code: true
     - name: Docker Compose Build
-      command: docker-compose build
+      command: docker-compose -p kafkaconnectmongodb build
     - name: Docker Compose Up
-      command: docker-compose up -d
+      command: docker-compose -p kafkaconnectmongodb up -d
     - name: Wait for Connect to get up
       command: >
         bash -c '
@@ -19,9 +19,11 @@
           done'
       nolog: true
     - name: Check docker compose log
-      command: docker-compose logs
+      command: docker-compose -p kafkaconnectmongodb logs
       stdout_has: [ 'INFO success: broker entered RUNNING state' ]
       stdout_not_has: [ 'INFO exited: broker', 'mongo.*ERROR:' ]
+    - name: fast-data-dev build.info
+      command: docker exec kafkaconnectmongodb_fast-data-dev_1 cat /build.info
 
 - name: Setup Mongo DB Connector
   entries:
@@ -91,4 +93,4 @@
 - name: Clean-up Containers
   entries:
     - name: Docker Compose Down
-      command: docker-compose down
+      command: docker-compose -p kafkaconnectmongodb down

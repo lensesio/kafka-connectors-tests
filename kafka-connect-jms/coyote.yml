@@ -22,6 +22,8 @@
       command: docker-compose -p kafkaconnectjms logs
       stdout_has: [ 'INFO success: broker entered RUNNING state' ]
       stdout_not_has: [ 'INFO exited: broker' ]
+    - name: fast-data-dev build.info
+      command: docker exec kafkaconnectjms_fast-data-dev_1 cat /build.info
 
 - name: Setup JMS Sink (ActiveMQ) Connector
   entries:
