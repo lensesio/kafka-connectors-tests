@@ -1,0 +1,57 @@
+- name: coyote
+  title: kafka-connect-ftp
+
+- name: Setup Containers
+  entries:
+    - name: Docker Compose Pull
+      command: docker-compose -p kafkaconnectftp pull
+      ignore_exit_code: true
+    - name: Docker Compose Up
+      command: docker-compose -p kafkaconnectftp up -d
+    - name: Wait for Connect to get up
+      command: >
+        bash -c '
+          for ((i=0;i<30;i++)); do
+            sleep 10;
+            docker exec kafkaconnectftp_fast-data-dev_1 curl "http://fast-data-dev:8083/connectors" && break;
+          done'
+      nolog: true
+    - name: Check docker compose log
+      command: docker-compose -p kafkaconnectftp logs
+      stdout_has: [ 'INFO success: broker entered RUNNING state' ]
+      stdout_not_has: [ 'INFO exited: broker' ]
+    - name: fast-data-dev build.info
+      command: docker exec kafkaconnectftp_fast-data-dev_1 cat /build.info
+
+- name: Setup FTP Connector
+  entries:
+    - name: Create Topic
+      command: >
+        docker run --rm --network=kafkaconnectftp_default landoop/fast-data-dev
+        kafka-topics --zookeeper fast-data-dev:2181 --topic ftpsource --partitions 1 -replication-factor 1 --create
+    - name: Create a FTP Connector
+      command: >
+        docker run --rm --network=kafkaconnectftp_default landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9]  ']
+      stdin: |
+        {
+          "name"=ftp-source,
+          "config": {
+            "connector.class": "com.datamountaineer.streamreactor.connect.ftp.source.FtpSourceConnector",
+            "tasks.max": "1",
+            "connect.ftp.address"="ftp:21",
+            "connect.ftp.user"="ftp",
+            "connect.ftp.password"="ftp",
+            "connect.ftp.refresh"="PT1M",
+            "connect.ftp.file.maxage"="P14D",
+            "connect.ftp.keystyle"="struct"
+          }
+        }
+
+#- name: Clean-up Containers
+#  entries:
+#    - name: Docker Compose Down
+#      command: docker-compose -p kafkaconnectftp down
