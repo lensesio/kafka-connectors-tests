@@ -13,9 +13,8 @@ services:
       - FORWARDLOGS=0
       - RUNTESTS=0
       - CONNECTORS=mqtt
-    ports:
-      - 3030:3030
-
+    # ports:
+    #   - 3030:3030
   activemq:
     build:
       context: ./activemq
@@ -23,7 +22,4 @@ services:
         ACTIVEMQ_VERSION: 5.14.5
         ACTIVEMQ_ADMIN: "landoop: landoop, admin"
         ACTIVEMQ_USER: "test: test, user"
-    ports:
-      - 8161:8161
-      - 61616:61616
     image: landoop/activemq

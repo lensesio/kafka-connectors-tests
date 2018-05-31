@@ -89,7 +89,7 @@
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       stdout_has: [ 'INSERT.*1690010000463.*844680.*1480706004383.*online.*17.*1.*440.*Standard.*3.*ship_asap.*177.*Occasional.*20.*177', '0002\.00a\.00009a98.*UPDATE.*1690010001020.*844707.*1480706014290.*online.*8.*1.*¾\$.*983.*Standard.*5.*ship_asap.*77.*Occasional.*112' ]
-    - name: Read First 4000 Lines of Connect Logs
+    - name: Read First 5000 Lines of Connect Logs
       command: >
         docker exec kafkaconnectdbvisitreplicate_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
       stdout_not_has: [ '\] ERROR' ]

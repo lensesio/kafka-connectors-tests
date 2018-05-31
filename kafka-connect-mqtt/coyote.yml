@@ -25,7 +25,7 @@
     - name: fast-data-dev build.info
       command: docker exec kafkaconnectmqtt_fast-data-dev_1 cat /build.info
 
-- name: Setup MQTT (ActiveMQ) Source Connector
+- name: Setup MQTT (ActiveMQ) Connector
   entries:
     - name: Create Kafka Topic
       command: >
@@ -62,39 +62,7 @@
     - command: sleep 15
       nolog: true
 
-- name: Setup MQTT (ActiveMQ) Sink Connector
-  entries:
-    - name: Create Sink Topic
-      command: >
-        docker run --rm --network=kafkaconnectmqtt_default landoop/fast-data-dev
-        kafka-topics --zookeeper fast-data-dev:2181 --topic mqtt-sink --partitions 1 --replication-factor 1 --create
-    - name: Create MQTT Sink Distributed Connector
-      command: >
-        docker run --rm --network=kafkaconnectmqtt_default -i landoop/fast-data-dev
-          curl -vs --stderr - -X POST -H "Content-Type: application/json"
-            --data @-
-            "http://fast-data-dev:8083/connectors"
-      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
-      stdin: |
-        {
-          "name":"mqtt-sink",
-          "config": {
-            "tasks.max":"1",
-            "connector.class":"com.datamountaineer.streamreactor.connect.mqtt.sink.MqttSinkConnector",
-            "topics":"mqtt-sink",
-            "connect.mqtt.hosts":"tcp://activemq:1883",
-            "connect.mqtt.clean":"true",
-            "connect.mqtt.timeout":"1000",
-            "connect.mqtt.keep.alive":"1000",
-            "connect.mqtt.service.quality":"1",
-            "connect.mqtt.client.id":"dm_sink_id",
-            "connect.mqtt.kcql":"INSERT INTO /landoop/mqtt_topic SELECT * FROM mqtt-sink"
-          }
-        }
-    - command: sleep 30
-      nolog: true
-
-- name: Test Source Connector
+- name: Test Connector
   entries:
     - name: Read Entries from Topic
       command: >
@@ -114,86 +82,7 @@
         docker exec kafkaconnectmqtt_fast-data-dev_1 head -n7000 /var/log/connect-distributed.log
       stdout_not_has: [ '\] ERROR' ]
 
-- name: Test Sink Connector
+- name: Clean-up Containers
   entries:
-    - name: Write entries to Topic
-      command: >
-        docker run --rm -i --network=kafkaconnectmqtt_default landoop/fast-data-dev
-              kafka-avro-console-producer --broker-list fast-data-dev:9092
-                --topic=mqtt-sink --property schema.registry.url="http://fast-data-dev:8081"
-                --property
-            value.schema='{"type":"record","name":"myrecord","fields":[{"name":"id","type":"int"},{"name":"created", "type": "string"}, {"name":"product", "type": "string"}, {"name":"price", "type": "double"}]}'
-      stdin: |
-        {"id": 1, "created": "2016-05-06 13:53:00", "product": "OP-DAX-P-20150201-95.7", "price": 94.2}
-        {"id": 2, "created": "2016-05-06 13:54:00", "product": "OP-DAX-C-20150201-100", "price": 99.5}
-        {"id": 3, "created": "2016-05-06 13:55:00", "product": "FU-DATAMOUNTAINEER-20150201-100", "price": 10000}
-        {"id": 4, "created": "2016-05-06 13:56:00", "product": "FU-KOSPI-C-20150201-100", "price": 150}
-      timeout: 25s
-    - command: sleep 60
-      nolog: true
-    - name: Read activemq-test logs to verify messages were passed
-      command: >
-        docker exec kafkaconnectmqtt_fast-data-dev_1 cat /var/log/activemq-test.log
-      stdout_not_has: [ 'OP-DAX-P-20150201-95.7', 'OP-DAX-C-20150201-100' ]
-    - name: Read First 4000 Lines of Connect Logs
-      command: >
-        docker exec kafkaconnectmqtt_fast-data-dev_1 head -n4000 /var/log/connect-distributed.log
-      stdout_not_has: [ '\] ERROR' ]
-    - name: Create a new Kafka Topic for the source
-      command: >
-        docker run --rm --network=kafkaconnectmqtt_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic mqtt-source2 --partitions 1 --replication-factor 1 --create
-    - name: Setup a Listener for ActiveMQ Topic
-      command: >
-        docker exec -d kafkaconnectmqtt_fast-data-dev_1
-          nohup activemq-test -server activemq:1883 -origin /topic/connect_topic -log /var/log/activemq-test.log
-    - name: Create a new MQTT Distributed Connector
-      command: >
-        docker exec -i kafkaconnectmqtt_fast-data-dev_1
-          curl -vs --stderr - -X POST -H "Content-Type: application/json"
-               --data @-
-               "http://fast-data-dev:8083/connectors"
-      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
-      stdin: |
-        {
-          "name": "mqtt-source2",
-          "config": {
-            "connector.class": "com.datamountaineer.streamreactor.connect.mqtt.source.MqttSourceConnector",
-            "tasks.max": "1",
-            "connect.mqtt.connection.clean": "true",
-            "connect.mqtt.connection.timeout": "1000",
-            "connect.mqtt.kcql": "INSERT INTO mqtt-source2 SELECT * FROM mqtt-sink WITHCONVERTER=`com.datamountaineer.streamreactor.connect.converters.source.AvroConverter`",
-            "connect.mqtt.connection.keep.alive": "1000",
-            "connect.source.converter.avro.schemas": "/topic/connect_topic=/schema.avro",
-            "connect.mqtt.client.id": "dm_source_id,",
-            "connect.mqtt.converter.throw.on.error": "true",
-            "connect.mqtt.hosts": "tcp://activemq:1883",
-            "connect.mqtt.service.quality": "1"
-          }
-        }
-    - command: sleep 15
-      nolog: true
-    - name: Read Entries from new source Topic
-      command: >
-        timeout 10
-        docker exec kafkaconnectmqtt_fast-data-dev_1
-          kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
-                                      --topic mqtt-source2 --from-beginning --new-consumer
-                                      --property schema.registry.url=http://fast-data-dev:8081
-      ignore_exit_code: true
-      stdout_has: [ '{"id": 1, "created": "2016-05-06 13:53:00", "product": "OP-DAX-P-20150201-95.7", "price": 94.2}', '{"output":16,"deviceid":"ship5-deck2-rack3"}' ]
-    - name: Read activemq-test logs to verify messages were passed
-      command: >
-        docker exec kafkaconnectmqtt_fast-data-dev_1 cat /var/log/activemq-test.log
-      stdout_not_has: [ 'OP-DAX-P-20150201-95.7', 'OP-DAX-C-20150201-100' ]
-    - name: Read First 7000 Lines of Connect Logs
-      command: >
-        docker exec kafkaconnectmqtt_fast-data-dev_1 head -n7000 /var/log/connect-distributed.log
-      stdout_not_has: [ '\] ERROR' ]
-
-#- name: Clean-up Containers
-#  entries:
-#    - name: Docker Compose Down
-#      command: docker-compose -p kafkaconnectmqtt down
-#
-
+    - name: Docker Compose Down
+      command: docker-compose -p kafkaconnectmqtt down
