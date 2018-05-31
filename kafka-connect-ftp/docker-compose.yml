@@ -3,7 +3,7 @@ services:
   fast-data-dev:
     image: landoop/fast-data-dev:latest
     depends_on:
-      - ftp
+      - ftp1
     environment:
       - ADV_HOST=fast-data-dev
       - FORWARDLOGS=0
@@ -11,7 +11,7 @@ services:
       - CONNECTORS=ftp
     ports:
       - 3030:3030
-  ftp:
+  ftp1:
     image: bogem/ftp
     ports:
       - "20:20"
@@ -22,4 +22,4 @@ services:
     environment:
       - FTP_USER=ftp
       - FTP_PASS=ftp
-      - PASV_ADDRESS=ftp
+      - PASV_ADDRESS=ftp1
