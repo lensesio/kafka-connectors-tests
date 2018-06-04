@@ -269,9 +269,6 @@
             value.schema='{"type":"record","name":"myrecord","fields":[{"name":"id","type":"int"},{"name":"created", "type": "string"}, {"name":"product", "type": "string"}, {"name":"price", "type": "double"}]}'
       stdin: |
         {"id": 1, "created": "2016-05-06 13:53:00", "product": "20150201-95.7", "price": 94.2}
-        {"id": 2, "created": "2016-05-06 13:54:00", "product": "OP-DAX-C-20150201-100", "price": 99.5}
-        {"id": 3, "created": "2016-05-06 13:55:00", "product": "FU-DATAMOUNTAINEER-20150201-100", "price": 10000}
-        {"id": 4, "created": "2016-05-06 13:56:00", "product": "FU-KOSPI-C-20150201-100", "price": 150}
       timeout: 25s
     - command: sleep 60
       nolog: true
