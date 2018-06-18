@@ -1,0 +1,26 @@
+- name: coyote
+  title: kafka-connect-hive
+
+- name: Setup Containers for Source Connector Tests
+  entries:
+    - name: Docker Compose Pull
+      command: docker-compose -p kafkaconnecthive pull
+      ignore_exit_code: true
+    - name: Build Docker Images
+      command: docker-compose -p kafkaconnecthive build
+    - name: Docker Compose Up
+      command: docker-compose -p kafkaconnecthive up -d
+    - name: Wait for Connect to get up
+      command: >
+        bash -c '
+          for ((i=0;i<30;i++)); do
+            sleep 10;
+            docker exec kafkaconnecthive_fast-data-dev_1 curl "http://localhost:8083/connectors" && break;
+          done'
+      nolog: true
+    - name: Check docker compose log
+      command: docker-compose -p kafkaconnecthive logs
+      stdout_has: [ 'INFO success: broker entered RUNNING state' ]
+      stdout_not_has: [ 'INFO exited: broker', 'cassandra.*ERROR', 'cassandra.*Exception' ]
+    - name: fast-data-dev build.info
+      command: docker exec kafkaconnecthive_fast-data-dev_1 cat /build.info
