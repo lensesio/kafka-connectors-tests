@@ -69,7 +69,7 @@
         timeout 10
         docker exec kafkaconnectmqtt_fast-data-dev_1
           kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
-                                      --topic mqtt-source --from-beginning --new-consumer
+                                      --topic mqtt-source --from-beginning
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       stdout_has: [ '{"output":5,"deviceid":"plant1-room3-pod4"}', '{"output":16,"deviceid":"ship5-deck2-rack3"}' ]
