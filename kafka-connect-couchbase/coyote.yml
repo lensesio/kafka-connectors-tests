@@ -110,7 +110,7 @@
             --topic couchbase-sink --property schema.registry.url="http://fast-data-dev:8081"
             --property
             value.schema='{"type":"record","name":"User","fields":[{"name":"firstName","type":"string"},{"name":"lastName","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
-            --property parse.key=true --property key.separator=|
+            --property parse.key=true --property key.separator="|"
             --property key.schema='{"type":"string"}'
       stdin: |
         "Smith"|{"firstName": "John", "lastName": "Smith", "age":30, "salary": 4830}
@@ -129,7 +129,7 @@
             --topic couchbase-sink --property schema.registry.url="http://fast-data-dev:8081"
             --property
             value.schema='{"type":"record","name":"User","fields":[{"name":"firstName","type":"string"},{"name":"lastName","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
-            --property parse.key=true --property key.separator=|
+            --property parse.key=true --property key.separator="|"
             --property key.schema='{"type":"string"}'
       stdin: |
         "UpdateSink"|{"firstName": "Wa-updated-lly", "lastName": "UpdateSink", "age":33, "salary": 4210}
@@ -144,7 +144,7 @@
     #         --topic couchbase-sink --property schema.registry.url="http://fast-data-dev:8081"
     #         --property
     #         value.schema='{"type":"record","name":"User","fields":[{"name":"firstName","type":"string"},{"name":"lastName","type":"string"},{"name":"age","type":"int"},{"name":"salary","type":"double"}]}'
-    #         --property parse.key=true --property key.separator=|
+    #         --property parse.key=true --property key.separator="|"
     #         --property key.schema='{"type":"string"}'
     #   stdin: |
     #     "DeleteSink"|
