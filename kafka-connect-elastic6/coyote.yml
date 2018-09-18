@@ -27,11 +27,15 @@
 
 - name: Setup ElasticSearch Connector
   entries:
-    - name: Create Topic
+    - name: Create Topic for Transport Test
       command: >
         docker run --rm --network=kafkaconnectelastic6_default landoop/fast-data-dev
-          kafka-topics --zookeeper fast-data-dev:2181 --topic elastic-sink --partitions 1 --replication-factor 1 --create
-    - name: Create an ElasticSearch Distributed Connector
+          kafka-topics --zookeeper fast-data-dev:2181 --topic elastic-sink-transport --partitions 1 --replication-factor 1 --create
+    - name: Create Topic for HTTP Test
+      command: >
+        docker run --rm --network=kafkaconnectelastic6_default landoop/fast-data-dev
+          kafka-topics --zookeeper fast-data-dev:2181 --topic elastic-sink-http --partitions 1 --replication-factor 1 --create
+    - name: Create an ElasticSearch Distributed Connector using Transport
       command: >
         docker run --rm --network=kafkaconnectelastic6_default -i landoop/fast-data-dev
           curl -vs --stderr - -X POST -H "Content-Type: application/json"
@@ -40,45 +44,87 @@
       stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
       stdin: |
         {
-          "name": "elastic-sink",
+          "name": "elastic-sink-transport",
           "config": {
             "connector.class": "com.datamountaineer.streamreactor.connect.elastic6.ElasticSinkConnector",
             "tasks.max": "1",
-            "topics": "elastic-sink",
+            "topics": "elastic-sink-transport",
             "connect.elastic.url": "elasticsearch:9300",
             "connect.elastic.cluster.name": "landoop",
-            "connect.elastic.kcql": "INSERT INTO sink-index SELECT id, random_field FROM elastic-sink",
-            "connect.deprecated.fields.to.remove": "connect.elastic.sink.kcql"
+            "connect.elastic.kcql": "INSERT INTO sink-index SELECT id, random_field FROM elastic-sink-transport"
           }
         }
+    - name: Create an ElasticSearch Distributed Connector using HTTP
+      command: >
+        docker run --rm --network=kafkaconnectelastic6_default -i landoop/fast-data-dev
+          curl -vs --stderr - -X POST -H "Content-Type: application/json"
+               --data @-
+               "http://fast-data-dev:8083/connectors"
+      stdout_not_has: [ 'HTTP/1.1 [45][0-9][0-9] ' ]
+      stdin: |
+        {
+          "name": "elastic-sink-http",
+          "config": {
+            "connector.class": "com.datamountaineer.streamreactor.connect.elastic6.ElasticSinkConnector",
+            "tasks.max": "1",
+            "topics": "elastic-sink-http",
+            "connect.elastic.url": "elasticsearch:9200",
+            "connect.elastic.use.http": "HTTP",
+            "connect.elastic.use.http.username": "",
+            "connect.elastic.use.http.password": "",
+            "connect.elastic.kcql": "INSERT INTO sink-index SELECT id, random_field FROM elastic-sink-http"
+          }
+        }
+
     - command: sleep 30
       nolog: true
 
 - name: Test Connector
   entries:
-    - name: Write Entries into Topic
+    - name: Write Entries into Transport Topic
       command: >
         docker run --rm -i --network=kafkaconnectelastic6_default landoop/fast-data-dev
           kafka-avro-console-producer --broker-list fast-data-dev:9092
-            --topic elastic-sink --property schema.registry.url="http://fast-data-dev:8081"
+            --topic elastic-sink-transport --property schema.registry.url="http://fast-data-dev:8081"
             --property
             value.schema='{"type":"record","name":"myrecord","fields":[{"name":"id","type":"int"},{"name":"random_field","type":"string"}]}'
       stdin: |
-        {"id": 999, "random_field": "foo"}
-        {"id": 888, "random_field": "bar"}
+        {"id": 999, "random_field": "foo-transport"}
+        {"id": 888, "random_field": "bar-transport"}
+      timeout: 20s
+    - name: Write Entries into HTTP Topic
+      command: >
+        docker run --rm -i --network=kafkaconnectelastic6_default landoop/fast-data-dev
+          kafka-avro-console-producer --broker-list fast-data-dev:9092
+            --topic elastic-sink-http --property schema.registry.url="http://fast-data-dev:8081"
+            --property
+            value.schema='{"type":"record","name":"myrecord","fields":[{"name":"id","type":"int"},{"name":"random_field","type":"string"}]}'
+      stdin: |
+        {"id": 999, "random_field": "foo-http"}
+        {"id": 888, "random_field": "bar-http"}
       timeout: 20s
     - command: sleep 60
       nolog: true
-    - name: Verify entry 1
+    - name: Verify entry 1 for Transport
       command: >
         docker run --rm --network=kafkaconnectelastic6_default landoop/fast-data-dev
           curl -XGET -u elastic:changeme 'http://elasticsearch:9200/sink-index/_search?q=id:999'
-      stdout_has: [ 'random_field', 'foo' ]
-    - name: Verify entry 2
+      stdout_has: [ 'random_field', 'foo-transport' ]
+    - name: Verify entry 2 for Transport
       command: >
         docker run --rm --network=kafkaconnectelastic6_default landoop/fast-data-dev
           curl -XGET -u elastic:changeme 'http://elasticsearch:9200/sink-index/_search?q=id:888'
-      stdout_has: [ 'random_field', 'bar' ]
+      stdout_has: [ 'random_field', 'bar-transport' ]
+    - name: Verify entry 1 for HTTP
+      command: >
+        docker run --rm --network=kafkaconnectelastic6_default landoop/fast-data-dev
+          curl -XGET -u elastic:changeme 'http://elasticsearch:9200/sink-index/_search?q=id:999'
+      stdout_has: [ 'random_field', 'foo-http' ]
+    - name: Verify entry 2 for HTTP
+      command: >
+        docker run --rm --network=kafkaconnectelastic6_default landoop/fast-data-dev
+          curl -XGET -u elastic:changeme 'http://elasticsearch:9200/sink-index/_search?q=id:888'
+      stdout_has: [ 'random_field', 'bar-http' ]
     - name: Verify ElasticSearch
       command: >
         docker run --rm --network=kafkaconnectelastic6_default landoop/fast-data-dev

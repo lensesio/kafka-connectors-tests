@@ -18,6 +18,8 @@ services:
       - bootstrap.memory_lock=false
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - xpack.security.enabled=false
+      - network.host=0.0.0.0
+      - transport.publish_host=elasticsearch
     # ulimits:
     #   memlock:
     #     soft: -1
