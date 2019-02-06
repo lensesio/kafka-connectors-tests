@@ -64,7 +64,7 @@
         timeout 30
         docker run --rm --network=kafkaconnectcoap_default landoop/fast-data-dev
           kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
-                                      --topic coap --from-beginning --new-consumer
+                                      --topic coap --from-beginning
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       stdout_has: [ 'is_acknowledged', 'ingest_time' ]

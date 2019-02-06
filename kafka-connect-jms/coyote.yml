@@ -133,7 +133,7 @@
         timeout 20
         docker run --rm --network=kafkaconnectjms_default landoop/fast-data-dev
           kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
-                                      --topic jms-source --from-beginning --new-consumer
+                                      --topic jms-source --from-beginning
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       stdout_has: [ 'John', 'Smith', 'Anna', 'Jones' ]

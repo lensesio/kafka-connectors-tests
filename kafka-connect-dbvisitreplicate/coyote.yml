@@ -76,7 +76,7 @@
         timeout 20
         docker exec kafkaconnectdbvisitreplicate_fast-data-dev_1
           kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
-                                      --topic REP-SOE.ADDRESSES --from-beginning --new-consumer
+                                      --topic REP-SOE.ADDRESSES --from-beginning
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       stdout_has: [ 'Workington', 'Devon', 'Finland', 'Scunthorpe.*Bath.*Israel', 'Milnathort.*Pembrokeshire.*Denmark' ]
@@ -85,7 +85,7 @@
         timeout 20
         docker exec kafkaconnectdbvisitreplicate_fast-data-dev_1
           kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
-                                      --topic REP-SOE.ORDERS --from-beginning --new-consumer
+                                      --topic REP-SOE.ORDERS --from-beginning
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       stdout_has: [ 'INSERT.*1690010000463.*844680.*1480706004383.*online.*17.*1.*440.*Standard.*3.*ship_asap.*177.*Occasional.*20.*177', '0002\.00a\.00009a98.*UPDATE.*1690010001020.*844707.*1480706014290.*online.*8.*1.*¾\$.*983.*Standard.*5.*ship_asap.*77.*Occasional.*112' ]

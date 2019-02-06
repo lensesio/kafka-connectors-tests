@@ -64,7 +64,7 @@
         timeout 20
         docker run --rm --network=kafkaconnectyahoo_default landoop/fast-data-dev
           kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
-                                      --topic yahoo-fx-source --from-beginning --new-consumer
+                                      --topic yahoo-fx-source --from-beginning
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       stdout_has: [ 'USDGBP', 'EURGBP', 'price' ]
@@ -73,7 +73,7 @@
         timeout 20
         docker run --rm --network=kafkaconnectyahoo_default landoop/fast-data-dev
           kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
-                                      --topic yahoo-stocks-source --from-beginning --new-consumer
+                                      --topic yahoo-stocks-source --from-beginning
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       stdout_has: [ 'Microsoft', 'Alphabet', 'Apple', 'currency' ]

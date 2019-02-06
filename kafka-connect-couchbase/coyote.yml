@@ -159,7 +159,7 @@
         timeout 10
         docker run --rm --network=kafkaconnectcouchbase_default landoop/fast-data-dev
           kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
-                                      --topic couchbase-source --from-beginning --new-consumer
+                                      --topic couchbase-source --from-beginning
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       stdout_has: [ 'Smith.*John.*Smith.*30.*4830', 'Jones.*Anna.*Jones.*28.*5430', 'DeleteSink.*Jamie.*DeleteSink.*27.*3950' ]
@@ -173,7 +173,7 @@
         timeout 10
         docker run --rm --network=kafkaconnectcouchbase_default landoop/fast-data-dev
           kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
-                                      --topic couchbase-source --from-beginning --new-consumer
+                                      --topic couchbase-source --from-beginning
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       ## When we update the source, couchbase re-orders the fiels (alphabetically probably?)

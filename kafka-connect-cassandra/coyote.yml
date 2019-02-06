@@ -120,7 +120,7 @@
         timeout 20
         docker run --rm --network=kafkaconnectcassandra_default landoop/fast-data-dev
           kafka-avro-console-consumer --bootstrap-server fast-data-dev:9092
-                                      --topic cassandra-source --from-beginning --new-consumer
+                                      --topic cassandra-source --from-beginning
                                       --property schema.registry.url=http://fast-data-dev:8081
       ignore_exit_code: true
       stdout_has: [ 'OP-DAX-P-20150201-95.7', 'OP-DAX-C-20150201-100', 'FU-KOSPI-C-20150201-100' ]
